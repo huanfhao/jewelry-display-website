@@ -27,6 +27,11 @@ const nextConfig = {
     removeConsole: true
   },
   webpack: (config, { isServer }) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve(__dirname, './src')
+    };
+
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
