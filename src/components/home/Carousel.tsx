@@ -143,10 +143,13 @@ export default function Carousel() {
       {/* Progress bar */}
       <div className="absolute bottom-0 left-0 w-full h-1 bg-white/10">
         <div 
-          className="h-full bg-white/40 transition-all duration-[5000ms] ease-linear"
           style={{ 
             width: isHovered ? '0%' : '100%',
             transitionProperty: 'width',
+            transitionDuration: '5000ms',
+            transitionTimingFunction: 'linear',
+            height: '100%',
+            backgroundColor: 'rgba(255, 255, 255, 0.4)'
           }}
         />
       </div>

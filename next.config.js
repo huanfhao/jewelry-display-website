@@ -15,7 +15,11 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true
   },
-  swcMinify: true
+  swcMinify: true,
+  staticPageGenerationTimeout: 120,
+  compiler: {
+    removeConsole: true
+  }
 }
 
 module.exports = nextConfig 
