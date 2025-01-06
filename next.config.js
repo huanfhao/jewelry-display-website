@@ -25,13 +25,42 @@ const nextConfig = {
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
-        crypto: false
+        crypto: false,
+        path: false,
+        os: false
       };
     }
+
+    config.optimization = {
+      ...config.optimization,
+      minimize: true,
+      splitChunks: {
+        chunks: 'all',
+        minSize: 20000,
+        maxSize: 244000,
+        minChunks: 1,
+        maxAsyncRequests: 30,
+        maxInitialRequests: 30,
+        cacheGroups: {
+          default: false,
+          vendors: false,
+          commons: {
+            name: 'commons',
+            chunks: 'all',
+            minChunks: 2,
+            reuseExistingChunk: true
+          }
+        }
+      }
+    };
+
     return config;
   },
   poweredByHeader: false,
-  generateBuildId: () => 'build'
+  generateBuildId: () => 'build',
+  productionBrowserSourceMaps: false,
+  reactStrictMode: false,
+  compress: true
 }
 
 module.exports = nextConfig 
