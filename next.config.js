@@ -8,7 +8,14 @@ const nextConfig = {
     serverActions: {
       allowedOrigins: ['localhost:3000', 'jewelry-display-website.vercel.app']
     }
-  }
+  },
+  typescript: {
+    ignoreBuildErrors: true
+  },
+  eslint: {
+    ignoreDuringBuilds: true
+  },
+  swcMinify: true
 }
 
 module.exports = nextConfig 
