@@ -7,6 +7,12 @@ const nextConfig = {
   experimental: {
     serverActions: {
       allowedOrigins: ['localhost:3000', 'jewelry-display-website.vercel.app']
+    },
+    optimizePackageImports: ['@mui/icons-material', '@mui/material'],
+    turbotrace: {
+      logLevel: 'error',
+      logDetail: false,
+      memoryLimit: 4096
     }
   },
   typescript: {
@@ -38,18 +44,9 @@ const nextConfig = {
         chunks: 'all',
         minSize: 20000,
         maxSize: 244000,
-        minChunks: 1,
-        maxAsyncRequests: 30,
-        maxInitialRequests: 30,
         cacheGroups: {
           default: false,
-          vendors: false,
-          commons: {
-            name: 'commons',
-            chunks: 'all',
-            minChunks: 2,
-            reuseExistingChunk: true
-          }
+          vendors: false
         }
       }
     };
