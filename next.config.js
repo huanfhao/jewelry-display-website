@@ -19,7 +19,19 @@ const nextConfig = {
   staticPageGenerationTimeout: 120,
   compiler: {
     removeConsole: true
-  }
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        crypto: false
+      };
+    }
+    return config;
+  },
+  poweredByHeader: false,
+  generateBuildId: () => 'build'
 }
 
 module.exports = nextConfig 
