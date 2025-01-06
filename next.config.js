@@ -13,7 +13,9 @@ const nextConfig = {
       logLevel: 'error',
       logDetail: false,
       memoryLimit: 4096
-    }
+    },
+    incrementalCacheHandlerPath: require.resolve('./cache-handler.js'),
+    isrMemoryCacheSize: 0,
   },
   typescript: {
     ignoreBuildErrors: true
@@ -25,6 +27,11 @@ const nextConfig = {
   staticPageGenerationTimeout: 120,
   compiler: {
     removeConsole: true
+  },
+  cache: true,
+  output: {
+    standalone: true,
+    export: false
   },
   webpack: (config, { isServer }) => {
     config.resolve.alias = {
@@ -51,7 +58,19 @@ const nextConfig = {
         maxSize: 244000,
         cacheGroups: {
           default: false,
-          vendors: false
+          vendors: false,
+          commons: {
+            name: 'commons',
+            chunks: 'all',
+            minChunks: 2,
+            priority: 20
+          },
+          vendor: {
+            name: 'vendor',
+            chunks: 'all',
+            test: /[\\/]node_modules[\\/]/,
+            priority: 10
+          }
         }
       }
     };
