@@ -1,46 +1,52 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
+import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.id) {
+
+    if (!session?.user?.id || session.user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+        { error: '无权访问' },
+        { status: 403 }
       );
     }
 
-    // TODO: Add role check when we implement roles
-
-    const [totalOrders, totalProducts, totalUsers, recentOrders] = await Promise.all([
+    const [
+      totalOrders,
+      totalProducts,
+      totalUsers,
+      recentOrders
+    ] = await Promise.all([
       prisma.order.count(),
       prisma.product.count(),
       prisma.user.count(),
       prisma.order.findMany({
         take: 5,
         orderBy: {
-          createdAt: 'desc',
+          createdAt: 'desc'
         },
         include: {
-          user: true,
-        },
-      }),
+          user: true
+        }
+      })
     ]);
 
     return NextResponse.json({
       totalOrders,
       totalProducts,
       totalUsers,
-      recentOrders,
+      recentOrders
     });
   } catch (error) {
     console.error('Error fetching admin stats:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch admin stats' },
+      { error: '获取统计数据失败' },
       { status: 500 }
     );
   }

@@ -5,7 +5,9 @@ const nextConfig = {
     domains: ['res.cloudinary.com'],
   },
   experimental: {
-    missingSuspenseWithCSRBailout: false
+    serverActions: {
+      allowedOrigins: ['localhost:3000', 'jewelry-display-website.vercel.app']
+    }
   }
 }
 
