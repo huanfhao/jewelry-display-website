@@ -248,3 +248,20 @@ model OrderItem {
 ```
 
 ## 12. Deployment Requirements 
+
+This project is deployed on Vercel with the following configuration:
+
+### Environment Variables Required:
+- `NEXT_PUBLIC_API_URL`: API endpoint URL
+- `DATABASE_URL`: PostgreSQL database connection string
+- `NEXTAUTH_URL`: Authentication callback URL
+- `NEXTAUTH_SECRET`: Secret key for NextAuth
+- `CLOUDINARY_CLOUD_NAME`: Cloudinary cloud name
+- `CLOUDINARY_API_KEY`: Cloudinary API key
+- `CLOUDINARY_API_SECRET`: Cloudinary API secret
+
+### Build Configuration:
+- Build Command: `pnpm build`
+- Install Command: `pnpm install`
+- Output Directory: `.next`
+- Node.js Version: 18.x
