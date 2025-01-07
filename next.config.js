@@ -10,9 +10,8 @@ const nextConfig = {
     ignoreDuringBuilds: true
   },
   experimental: {
-    // Optimize build performance
-    optimizeCss: true,
-    // Reduce memory usage during build
+    // Disable experimental features that might cause issues
+    optimizeCss: false,
     memoryBasedWorkersCount: true,
     // Disable build traces collection that's causing the stack overflow
     outputFileTracingRoot: undefined,
