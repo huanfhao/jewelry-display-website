@@ -9,17 +9,28 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true
   },
-  experimental: {
-    optimizeCss: false
-  },
+  experimental: false,
+  productionBrowserSourceMaps: false,
+  swcMinify: true,
+  compress: true,
   output: 'standalone',
-  generateBuildId: () => 'build',
   poweredByHeader: false,
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false
+      };
+    }
+    
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': require('path').resolve(__dirname, './src')
     };
+
     return config;
   }
 }

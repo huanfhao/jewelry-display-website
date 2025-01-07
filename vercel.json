@@ -1,16 +1,10 @@
 {
   "version": 2,
-  "buildCommand": "pnpm build",
-  "installCommand": "pnpm install",
   "framework": "nextjs",
-  "builds": [
-    {
-      "src": "next.config.js",
-      "use": "@vercel/next"
-    }
-  ],
+  "buildCommand": "NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 pnpm build",
+  "installCommand": "pnpm install",
   "env": {
     "NEXT_TELEMETRY_DISABLED": "1",
-    "NODE_OPTIONS": "--max-old-space-size=4096"
+    "NODE_OPTIONS": "--max-old-space-size=4096 --no-warnings"
   }
 } 
