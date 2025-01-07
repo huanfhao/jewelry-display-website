@@ -12,6 +12,15 @@ const nextConfig = {
   experimental: {
     appDir: true,
     serverActions: true
+  },
+  output: 'standalone',
+  productionBrowserSourceMaps: false,
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve(__dirname, './src')
+    };
+    return config;
   }
 }
 
