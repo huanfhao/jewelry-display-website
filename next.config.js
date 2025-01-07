@@ -9,12 +9,15 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true
   },
-  experimental: false,
-  productionBrowserSourceMaps: false,
+  experimental: {
+    appDir: false,
+    serverActions: false
+  },
+  reactStrictMode: true,
   swcMinify: true,
-  compress: true,
-  output: 'standalone',
-  poweredByHeader: false,
+  productionBrowserSourceMaps: false,
+  distDir: '.next',
+  generateBuildId: () => 'build',
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -26,6 +29,28 @@ const nextConfig = {
       };
     }
     
+    config.optimization = {
+      ...config.optimization,
+      minimize: true,
+      minimizer: [
+        ...config.optimization.minimizer || [],
+      ],
+      splitChunks: {
+        chunks: 'all',
+        minSize: 20000,
+        maxSize: 244000,
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+            priority: 10,
+            enforce: true
+          }
+        }
+      }
+    };
+
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': require('path').resolve(__dirname, './src')
