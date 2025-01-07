@@ -1,28 +1,21 @@
-import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token;
-    const isAdminRoute = req.nextUrl.pathname.startsWith('/admin');
-    
-    // 如果是管理员路由，但用户不是管理员
-    if (isAdminRoute && token?.role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/', req.url));
-    }
+export function middleware(request: NextRequest) {
+  // 继续处理请求
+  return NextResponse.next();
+}
 
-    return NextResponse.next();
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
-  }
-);
-
+// 配置匹配的路由
 export const config = {
   matcher: [
-    '/admin/:path*',
-    '/api/admin/:path*',
+    /*
+     * 匹配所有路径，除了:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
-}; 
+} 

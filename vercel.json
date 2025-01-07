@@ -1,7 +1,13 @@
 {
   "version": 2,
+  "framework": "nextjs",
   "buildCommand": "NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=4096' pnpm build",
   "installCommand": "pnpm install",
-  "framework": null,
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/"
+    }
+  ]
 } 
