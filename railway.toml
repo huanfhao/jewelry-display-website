@@ -1,0 +1,13 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "pnpm install && pnpm prisma generate && pnpm build"
+
+[deploy]
+startCommand = "pnpm start"
+healthcheckPath = "/"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+numReplicas = 1
+
+[variables]
+NODE_ENV = "production" 
