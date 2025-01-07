@@ -27,6 +27,8 @@ const nextConfig = {
     removeConsole: true
   },
   webpack: (config, { isServer }) => {
+    config.cache = true;
+
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': require('path').resolve(__dirname, './src')
