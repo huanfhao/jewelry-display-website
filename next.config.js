@@ -9,7 +9,9 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true
   },
-  // 简化 webpack 配置
+  experimental: {
+    optimizeCss: false
+  },
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
