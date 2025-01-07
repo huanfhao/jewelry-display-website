@@ -12,6 +12,9 @@ const nextConfig = {
   experimental: {
     optimizeCss: false
   },
+  output: 'standalone',
+  generateBuildId: () => 'build',
+  poweredByHeader: false,
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
