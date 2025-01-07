@@ -10,8 +10,8 @@ const nextConfig = {
     ignoreDuringBuilds: true
   },
   experimental: {
-    appDir: false,
-    serverActions: false
+    appDir: true,
+    serverActions: true
   },
   reactStrictMode: true,
   swcMinify: true,
