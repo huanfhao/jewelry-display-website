@@ -15,6 +15,12 @@ const nextConfig = {
   },
   output: 'standalone',
   productionBrowserSourceMaps: false,
+  onError: async (err) => {
+    console.error('Server Error:', err);
+  },
+  logging: {
+    level: 'verbose'
+  },
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
