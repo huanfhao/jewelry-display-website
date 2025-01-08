@@ -1,52 +1,46 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ShoppingCart, AlertCircle } from 'lucide-react';
-import type { Product, Category } from '@prisma/client';
-import { Button } from '@/components/ui/button';
-import { AddToCartToast } from '@/components/ui/add-to-cart-toast';
-import { useSession } from 'next-auth/react';
+import React, { useState } from 'react'
+import { motion } from 'framer-motion'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { Product } from '@prisma/client'
+import { formatPrice } from '@/lib/utils'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { ShoppingBag, Heart } from 'lucide-react'
+import { toast } from 'sonner'
+import { useSession } from 'next-auth/react'
 
-type ProductWithCategory = Product & {
-  category: Category;
-};
-
-interface ProductGridProps {
-  products: ProductWithCategory[];
+interface ExtendedProduct extends Product {
+  category: {
+    id: string;
+    name: string;
+  };
 }
 
-const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/400x400?text=No+Image';
+interface ProductGridProps {
+  products: ExtendedProduct[]
+}
 
 export default function ProductGrid({ products }: ProductGridProps) {
-  const router = useRouter();
-  const { data: session } = useSession();
-  const [addingToCart, setAddingToCart] = useState<string | null>(null);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const router = useRouter()
+  const { data: session } = useSession()
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({})
 
-  const handleAddToCart = async (product: ProductWithCategory, event: React.MouseEvent) => {
-    event.preventDefault(); // Prevent link navigation
-    if (addingToCart) return; // If adding another product, do not process
-
-    // Check if logged in
+  const handleAddToCart = async (e: React.MouseEvent, product: ExtendedProduct) => {
+    e.preventDefault() // 阻止链接跳转
+    
     if (!session) {
-      router.push('/login');
-      return;
+      toast.error('Please sign in to add items to cart')
+      router.push('/login')
+      return
     }
 
-    // Check stock
-    if (product.stock <= 0) {
-      setToastMessage('Out of stock');
-      setToastType('error');
-      setShowToast(true);
-      return;
-    }
+    if (loadingStates[product.id]) return
 
-    setAddingToCart(product.id);
+    setLoadingStates(prev => ({ ...prev, [product.id]: true }))
     try {
       const response = await fetch('/api/cart', {
         method: 'POST',
@@ -57,116 +51,94 @@ export default function ProductGrid({ products }: ProductGridProps) {
           productId: product.id,
           quantity: 1,
         }),
-      });
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (!response.ok) {
-        if (response.status === 400 && data.error === 'Out of stock') {
-          // Get current quantity in cart
-          const cartResponse = await fetch('/api/cart');
-          const cartItems = await cartResponse.json();
-          const currentCartItem = cartItems.find((item: any) => item.productId === product.id);
-          const currentQuantity = currentCartItem ? currentCartItem.quantity : 0;
-
-          setToastMessage(`Out of stock. Current stock: ${product.stock}, In cart: ${currentQuantity}`);
-          setToastType('error');
-        } else {
-          throw new Error(data.error || 'Failed to add to cart');
-        }
-      } else {
-        setToastMessage('Added to cart');
-        setToastType('success');
+        throw new Error(data.error || 'Failed to add to cart')
       }
-      setShowToast(true);
+
+      toast.success('Added to cart')
+      router.refresh() // 刷新页面以更新购物车数量
     } catch (error) {
-      console.error('Error adding to cart:', error);
-      setToastMessage(error instanceof Error ? error.message : 'Failed to add to cart, please try again');
-      setToastType('error');
-      setShowToast(true);
+      toast.error(error instanceof Error ? error.message : 'Failed to add to cart')
     } finally {
-      setAddingToCart(null);
+      setLoadingStates(prev => ({ ...prev, [product.id]: false }))
     }
-  };
+  }
+
+  const handleAddToWishlist = async (e: React.MouseEvent, product: ExtendedProduct) => {
+    e.preventDefault() // 阻止链接跳转
+    if (!session) {
+      toast.error('Please sign in to add items to wishlist')
+      router.push('/login')
+      return
+    }
+    // TODO: 实现添加到愿望清单的功能
+    toast.success('Added to wishlist')
+  }
 
   return (
-    <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {products.map((product) => (
-          <div key={product.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col h-full hover:shadow-lg hover:border-primary/50 hover:scale-[1.02] transition-all duration-300">
-            <Link href={`/products/${product.id}`} className="flex flex-col h-full group">
-              <div className="relative w-full pt-[100%] bg-gray-50">
-                <Image
-                  src={product.images[0] || PLACEHOLDER_IMAGE}
-                  alt={product.name}
-                  fill
-                  className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  priority={true}
-                />
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {products.map((product, index) => (
+        <Link 
+          key={product.id} 
+          href={`/products/${product.id}`}
+          className="group"
+        >
+          <Card className="overflow-hidden h-full transition-transform duration-300 hover:scale-[1.02]">
+            <div className="relative aspect-square">
+              <Image
+                src={product.images[0]}
+                alt={product.name}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                priority={index < 6}
+                loading={index < 6 ? 'eager' : 'lazy'}
+                quality={85}
+                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABQODxIPDRQSEBIXFRQdHx4eHRoaHSQtJSEkLzYxMC8vMTQ3PEFGODlLPTQ5RWFJTlNhWVdbZ2JnP0BXcWNcWVr/2wBDARUXFyAeIBogHh4gIiAqJSUlKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKir/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+                placeholder="blur"
+              />
+              <div className="absolute top-4 right-4 space-y-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={(e) => handleAddToWishlist(e, product)}
+                  className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-gray-100 transition-colors"
+                >
+                  <Heart className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={(e) => handleAddToCart(e, product)}
+                  disabled={loadingStates[product.id]}
+                  className="w-8 h-8 rounded-full bg-black text-white shadow-md flex items-center justify-center hover:bg-gray-900 transition-colors disabled:bg-gray-400"
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                </button>
               </div>
-              <div className="p-5 flex-1 flex flex-col border-t border-gray-100">
-                <h2 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-1">
+            </div>
+            <div className="p-4">
+              <div className="mb-2">
+                <span className="text-sm text-gray-500">{product.category.name}</span>
+                <h3 className="font-medium text-lg group-hover:text-primary transition-colors">
                   {product.name}
-                </h2>
-                <p className="text-gray-600 text-sm mb-4 flex-1 line-clamp-2">
-                  {product.description}
-                </p>
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-lg font-bold text-primary">
-                    ${product.price.toFixed(2)}
-                  </span>
-                  <span className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
-                    {product.category.name}
-                  </span>
-                </div>
-                {product.stock > 0 ? (
-                  <Button
-                    variant="secondary"
-                    className="w-full"
-                    onClick={(e) => handleAddToCart(product, e)}
-                    disabled={addingToCart === product.id}
-                  >
-                    {addingToCart === product.id ? (
-                      'Adding...'
-                    ) : (
-                      <>
-                        <ShoppingCart className="mr-2 h-4 w-4" />
-                        {session ? 'Add to Cart' : 'Login to Add to Cart'}
-                      </>
-                    )}
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    disabled
-                  >
-                    Out of Stock
-                  </Button>
-                )}
-                {product.stock <= 5 && product.stock > 0 && (
-                  <p className="text-orange-500 text-sm mt-3 flex items-center">
-                    <span className="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse"></span>
-                    Only {product.stock} left in stock!
-                  </p>
-                )}
+                </h3>
               </div>
-            </Link>
-          </div>
-        ))}
-        {products.length === 0 && (
-          <div className="col-span-full text-center py-12 text-gray-500 border-2 border-dashed border-gray-200 rounded-xl">
-            No products available
-          </div>
-        )}
-      </div>
-      <AddToCartToast
-        show={showToast}
-        onClose={() => setShowToast(false)}
-        message={toastMessage}
-        type={toastType}
-      />
-    </>
-  );
+              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                {product.description}
+              </p>
+              <div className="flex justify-between items-center">
+                <span className="text-lg font-semibold text-primary">
+                  {formatPrice(product.price)}
+                </span>
+                <Button variant="outline" size="sm">
+                  View Details
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </Link>
+      ))}
+    </div>
+  )
 } 

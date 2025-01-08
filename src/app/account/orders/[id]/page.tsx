@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
+import { formatPrice } from '@/lib/utils';
 
 interface OrderItem {
   id: string;
@@ -175,12 +176,12 @@ export default function OrderDetailPage({
                     Quantity: {item.quantity}
                   </p>
                   <p className="text-primary">
-                    ${item.price.toFixed(2)}
+                    {formatPrice(item.price)}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="font-medium">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    {formatPrice(item.price * item.quantity)}
                   </p>
                 </div>
               </div>
@@ -190,15 +191,15 @@ export default function OrderDetailPage({
           <div className="mt-6 pt-6 border-t">
             <div className="flex justify-between text-sm mb-2">
               <span>Subtotal</span>
-              <span>${order.total.toFixed(2)}</span>
+              <span>{formatPrice(order.total)}</span>
             </div>
             <div className="flex justify-between text-sm mb-2">
               <span>Shipping</span>
-              <span>$0.00</span>
+              <span>Free</span>
             </div>
             <div className="flex justify-between text-lg font-bold mt-4">
               <span>Total</span>
-              <span className="text-primary">${order.total.toFixed(2)}</span>
+              <span className="text-primary">{formatPrice(order.total)}</span>
             </div>
           </div>
         </div>

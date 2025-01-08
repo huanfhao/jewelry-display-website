@@ -52,11 +52,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-16">
       <div className="max-w-md mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl text-center">Create Account</CardTitle>
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-2xl text-center font-bold">Create Account</CardTitle>
+            <p className="text-center text-gray-500 mt-1">Join us to start shopping</p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">

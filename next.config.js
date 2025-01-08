@@ -1,7 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['res.cloudinary.com'],
+    domains: [
+      'res.cloudinary.com',
+      'images.unsplash.com',
+      'localhost',
+      'via.placeholder.com',
+      'placehold.co',
+    ],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
   },
   typescript: {
     ignoreBuildErrors: true
@@ -10,17 +22,10 @@ const nextConfig = {
     ignoreDuringBuilds: true
   },
   experimental: {
-    appDir: true,
     serverActions: true
   },
   output: 'standalone',
   productionBrowserSourceMaps: false,
-  onError: async (err) => {
-    console.error('Server Error:', err);
-  },
-  logging: {
-    level: 'verbose'
-  },
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,

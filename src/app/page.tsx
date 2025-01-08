@@ -1,17 +1,13 @@
-import Carousel from '@/components/home/Carousel';
-import ProductGrid from '@/components/home/ProductGrid';
-import CompanySection from '@/components/home/CompanySection';
+import Hero from '@/components/home/Hero'
+import FeaturedProducts from '@/components/home/FeaturedProducts'
+import BrandFeatures from '@/components/home/BrandFeatures'
 
 export default function Home() {
   return (
     <main>
-      <Carousel />
-      
-      <section className="container mx-auto px-4 py-16">
-        <ProductGrid />
-      </section>
-
-      <CompanySection />
+      <Hero />
+      <FeaturedProducts />
+      <BrandFeatures />
     </main>
-  );
+  )
 }

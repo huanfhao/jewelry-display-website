@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
+import { formatPrice } from '@/lib/utils';
 
 interface OrderItem {
   id: string;
@@ -194,12 +195,12 @@ export default function AdminOrdersPage() {
                       数量：{item.quantity}
                     </p>
                     <p className="text-primary">
-                      ${item.price.toFixed(2)}
+                      {formatPrice(item.price)}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="font-medium">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {formatPrice(item.price * item.quantity)}
                     </p>
                   </div>
                 </div>
@@ -220,7 +221,7 @@ export default function AdminOrdersPage() {
               <div className="text-right mt-4">
                 <p className="text-sm text-gray-500">订单总额</p>
                 <p className="text-lg font-bold text-primary">
-                  ${order.total.toFixed(2)}
+                  {formatPrice(order.total)}
                 </p>
               </div>
             </div>

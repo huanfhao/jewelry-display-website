@@ -7,15 +7,17 @@ import { Prisma } from '@prisma/client';
 // GET /api/products - 获取产品列表
 export async function GET(request: Request) {
   try {
-    // 首先测试数据库连接
-    await prisma.$connect();
-
     const { searchParams } = new URL(request.url);
-    const categoryId = searchParams.get('categoryId');
+    const featured = searchParams.get('featured') === 'true';
+    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined;
+    const category = searchParams.get('category');
     const search = searchParams.get('search');
-    
+
+    console.log('Query params:', { featured, limit, category, search });
+
     const where: Prisma.ProductWhereInput = {
-      ...(categoryId && { categoryId }),
+      ...(featured && { isFeatured: true }),
+      ...(category && { categoryId: category }),
       ...(search && {
         OR: [
           { name: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
@@ -24,25 +26,52 @@ export async function GET(request: Request) {
       }),
     };
 
+    console.log('Query where clause:', where);
+
     const products = await prisma.product.findMany({
       where,
       include: {
-        category: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy: [
+        {
+          createdAt: 'desc',
+        },
+      ],
+      ...(limit && { take: limit }),
     });
 
-    if (!products || products.length === 0) {
-      console.log('No products found');
-      return NextResponse.json([]);
-    }
+    // 添加图片 URL 验证
+    const validatedProducts = products.map(product => ({
+      ...product,
+      images: product.images.filter((url: string) => {
+        if (!url) return false;
+        try {
+          new URL(url);
+          return true;
+        } catch {
+          console.warn(`Invalid image URL found in product ${product.id}:`, url);
+          return false;
+        }
+      })
+    }));
 
-    return NextResponse.json(products);
+    console.log('Validated products:', JSON.stringify(validatedProducts, null, 2));
+
+    return NextResponse.json(validatedProducts);
   } catch (error) {
-    console.error('Error fetching products:', error);
-    // 返回更详细的错误信息
+    console.error('Error details:', error instanceof Error ? {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      cause: error.cause,
+    } : 'Unknown error');
+
     return NextResponse.json(
       { 
         error: 'Failed to fetch products',
@@ -51,16 +80,12 @@ export async function GET(request: Request) {
       },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
 // POST /api/products - 创建新产品
 export async function POST(request: Request) {
   try {
-    await prisma.$connect();
-    
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id || session.user.role !== 'ADMIN') {
@@ -81,6 +106,17 @@ export async function POST(request: Request) {
       );
     }
 
+    // 验证图片 URLs
+    const validImages = (images as string[]).filter((url: string) => {
+      if (!url) return false;
+      try {
+        new URL(url);
+        return true;
+      } catch {
+        return false;
+      }
+    });
+
     const product = await prisma.product.create({
       data: {
         name,
@@ -88,7 +124,7 @@ export async function POST(request: Request) {
         price: parseFloat(price),
         categoryId,
         stock: parseInt(stock),
-        images: images || [],
+        images: validImages,
       },
       include: {
         category: true,
@@ -106,7 +142,5 @@ export async function POST(request: Request) {
       },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 } 

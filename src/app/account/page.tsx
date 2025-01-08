@@ -1,180 +1,188 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
+import UserOverview from '@/components/account/UserOverview'
+import RecentOrders from '@/components/account/RecentOrders'
+import AddressList from '@/components/account/AddressList'
+
+interface User {
+  id: string
+  name: string
+  email: string
+  createdAt: string
+  image?: string
+}
+
+interface Order {
+  id: string
+  createdAt: string
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  total: number
+  items: {
+    id: string
+    name: string
+    image: string
+    quantity: number
+    price: number
+  }[]
+}
+
+interface Address {
+  id: string
+  name: string
+  phone: string
+  address: string
+  isDefault: boolean
+}
 
 export default function AccountPage() {
-  const { data: session, update } = useSession();
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [formData, setFormData] = useState({
-    name: session?.user?.name || '',
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-  });
+  const router = useRouter()
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [user, setUser] = useState<User | null>(null)
+  const [orders, setOrders] = useState<Order[]>([])
+  const [addresses, setAddresses] = useState<Address[]>([])
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    setLoading(true);
+  useEffect(() => {
+    fetchUserData()
+  }, [])
 
-    // Validate new password if changing
-    if (formData.newPassword) {
-      if (formData.newPassword.length < 6) {
-        setError('New password must be at least 6 characters');
-        setLoading(false);
-        return;
-      }
-
-      if (formData.newPassword !== formData.confirmPassword) {
-        setError('New passwords do not match');
-        setLoading(false);
-        return;
-      }
-    }
-
+  async function fetchUserData() {
     try {
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          currentPassword: formData.currentPassword,
-          newPassword: formData.newPassword,
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Update failed');
+      // 获取用户信息
+      const userResponse = await fetch('/api/user')
+      if (!userResponse.ok) {
+        throw new Error('Failed to fetch user data')
       }
+      const userData = await userResponse.json()
+      setUser(userData)
 
-      const data = await response.json();
-      
-      // Update user info in session
-      await update({
-        ...session,
-        user: {
-          ...session?.user,
-          name: data.name,
-        },
-      });
+      // 获取最近订单
+      const ordersResponse = await fetch('/api/orders?limit=5')
+      if (!ordersResponse.ok) {
+        throw new Error('Failed to fetch orders')
+      }
+      const ordersData = await ordersResponse.json()
+      setOrders(ordersData)
 
-      setSuccess('Profile updated successfully');
-      setFormData(prev => ({
-        ...prev,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      }));
-      router.refresh();
+      // 获取收货地址
+      const addressesResponse = await fetch('/api/addresses')
+      if (!addressesResponse.ok) {
+        throw new Error('Failed to fetch addresses')
+      }
+      const addressesData = await addressesResponse.json()
+      setAddresses(addressesData)
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Update failed');
+      setError('Failed to load account data')
+      console.error('Error fetching account data:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
+  const handleAddAddress = () => {
+    router.push('/account/addresses/new')
+  }
+
+  const handleEditAddress = (address: Address) => {
+    router.push(`/account/addresses/${address.id}/edit`)
+  }
+
+  const handleDeleteAddress = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this address?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/addresses/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete address')
+      }
+
+      setAddresses((prev) => prev.filter((address) => address.id !== id))
+    } catch (error) {
+      console.error('Error deleting address:', error)
+      alert('Failed to delete address')
+    }
+  }
+
+  const handleSetDefaultAddress = async (id: string) => {
+    try {
+      const response = await fetch(`/api/addresses/${id}/default`, {
+        method: 'PUT',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to set default address')
+      }
+
+      setAddresses((prev) =>
+        prev.map((address) => ({
+          ...address,
+          isDefault: address.id === id,
+        }))
+      )
+    } catch (error) {
+      console.error('Error setting default address:', error)
+      alert('Failed to set default address')
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (error || !user) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">{error || 'User not found'}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-sm uppercase tracking-wider hover:text-gray-600 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold mb-6">Personal Information</h1>
+    <div>
+      <h1 className="text-2xl font-bold mb-8">Personal Information</h1>
+      
+      <div className="space-y-8">
+        {/* 用户信息概览 */}
+        <UserOverview user={user} />
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {error && (
-          <div className="bg-red-50 text-red-500 p-4 rounded-md">
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="bg-green-50 text-green-500 p-4 rounded-md">
-            {success}
-          </div>
-        )}
-
+        {/* 最近订单 */}
         <div>
-          <label className="block text-sm font-medium mb-2">
-            Email Address
-          </label>
-          <Input
-            type="email"
-            value={session?.user?.email || ''}
-            disabled
-            className="bg-gray-50"
-          />
-          <p className="mt-1 text-sm text-gray-500">
-            Email address cannot be changed
-          </p>
+          <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
+          <RecentOrders orders={orders} />
         </div>
 
+        {/* 收货地址 */}
         <div>
-          <label htmlFor="name" className="block text-sm font-medium mb-2">
-            Name
-          </label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
+          <h2 className="text-xl font-semibold mb-4">Shipping Addresses</h2>
+          <AddressList
+            addresses={addresses}
+            onAdd={handleAddAddress}
+            onEdit={handleEditAddress}
+            onDelete={handleDeleteAddress}
+            onSetDefault={handleSetDefaultAddress}
           />
         </div>
-
-        <div className="pt-6 border-t">
-          <h2 className="text-lg font-semibold mb-4">Change Password</h2>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="currentPassword" className="block text-sm font-medium mb-2">
-                Current Password
-              </label>
-              <Input
-                id="currentPassword"
-                type="password"
-                value={formData.currentPassword}
-                onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium mb-2">
-                New Password
-              </label>
-              <Input
-                id="newPassword"
-                type="password"
-                value={formData.newPassword}
-                onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
-                Confirm New Password
-              </label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end">
-          <Button type="submit" disabled={loading}>
-            {loading ? 'Saving...' : 'Save Changes'}
-          </Button>
-        </div>
-      </form>
+      </div>
     </div>
-  );
+  )
 } 

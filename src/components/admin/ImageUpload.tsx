@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Loader2, X } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Loader2, X, Upload } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface ImageUploadProps {
   images: string[];
@@ -38,7 +40,7 @@ export default function ImageUpload({
 
     // 检查是否超过最大图片数量
     if (images.length + files.length > maxImages) {
-      setError(`最多只能上传${maxImages}张图片`);
+      toast.error(`最多只能上传${maxImages}张图片`);
       return;
     }
 
@@ -73,8 +75,10 @@ export default function ImageUpload({
       onChange([...images, ...data.urls]);
       // 清除input的值，允许重复上传相同的文件
       e.target.value = '';
+      toast.success('图片上传成功');
     } catch (error) {
       console.error('Upload error:', error);
+      toast.error(error instanceof Error ? error.message : '图片上传失败，请检查网络连接并重试');
       setError(error instanceof Error ? error.message : '图片上传失败，请检查网络连接并重试');
     } finally {
       setUploading(false);
@@ -84,6 +88,7 @@ export default function ImageUpload({
   const handleRemove = (index: number) => {
     const newImages = images.filter((_, i) => i !== index);
     onChange(newImages);
+    toast.success('图片已删除');
   };
 
   return (
@@ -94,14 +99,18 @@ export default function ImageUpload({
           variant="outline"
           onClick={() => document.getElementById('image-upload')?.click()}
           disabled={uploading || images.length >= maxImages}
+          className="flex items-center gap-2"
         >
           {uploading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
               上传中...
             </>
           ) : (
-            '上传图片'
+            <>
+              <Upload className="h-4 w-4" />
+              上传图片
+            </>
           )}
         </Button>
         <input
@@ -113,32 +122,33 @@ export default function ImageUpload({
           onChange={handleUpload}
           disabled={uploading || images.length >= maxImages}
         />
-        <span className="text-sm text-gray-500">
+        <p className="text-sm text-gray-500">
           最多上传 {maxImages} 张图片（每张不超过5MB）
-        </span>
+        </p>
       </div>
 
       {error && (
-        <div className="text-sm text-red-500 bg-red-50 p-2 rounded">
+        <div className="text-sm text-red-500 bg-red-50 p-3 rounded-md">
           {error}
         </div>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {images.map((url, index) => (
-          <div key={url} className="relative aspect-square">
+          <div key={url} className="group relative aspect-square rounded-lg overflow-hidden bg-gray-100 hover:bg-gray-200 transition-colors">
             <Image
               src={url}
               alt={`Product image ${index + 1}`}
               fill
-              className="object-cover rounded-lg"
+              className="object-cover"
             />
+            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity duration-200" />
             <button
               type="button"
               onClick={() => handleRemove(index)}
-              className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+              className="absolute top-2 right-2 p-1 bg-white rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-50"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4 text-red-500" />
             </button>
           </div>
         ))}

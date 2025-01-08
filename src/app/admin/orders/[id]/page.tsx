@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
+import React from 'react'
+import { Card } from '@/components/ui/card'
+import { formatPrice } from '@/lib/utils'
 
 interface OrderItem {
   id: string;
@@ -135,7 +138,7 @@ export default function OrderDetails({ params }: { params: { id: string } }) {
             </div>
             <div>
               <h2 className="text-sm font-medium text-gray-500">Total Amount</h2>
-              <p className="mt-1">${order.total.toFixed(2)}</p>
+              <p className="mt-1">{formatPrice(order.total)}</p>
             </div>
           </div>
 
@@ -201,13 +204,22 @@ export default function OrderDetails({ params }: { params: { id: string } }) {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  ${item.price.toFixed(2)}
+                  {formatPrice(item.price)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {item.quantity}
+                  <p className="text-sm text-gray-500">
+                    Quantity: {item.quantity}
+                  </p>
+                  <p className="text-primary">
+                    {formatPrice(item.price)}
+                  </p>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  ${(item.price * item.quantity).toFixed(2)}
+                  <div className="text-right">
+                    <p className="font-medium">
+                      {formatPrice(item.price * item.quantity)}
+                    </p>
+                  </div>
                 </td>
               </tr>
             ))}

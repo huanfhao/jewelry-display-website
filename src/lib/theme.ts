@@ -1,9 +1,9 @@
 export const theme = {
   colors: {
     primary: {
-      DEFAULT: '#8174A0', // 深紫色
-      light: '#9485B0',   // 浅紫色
-      dark: '#6E6390',    // 暗紫色
+      DEFAULT: '#8174A0', // Deep Purple
+      light: '#9485B0',   // Light Purple
+      dark: '#6E6390',    // Dark Purple
       50: '#F5F3F8',
       100: '#EBE7F1',
       200: '#D7CFE3',
@@ -16,19 +16,19 @@ export const theme = {
       900: '#353060',
     },
     secondary: {
-      DEFAULT: '#A888B5', // 淡紫色
-      light: '#B599C0',   // 更淡紫色
-      dark: '#9B77AA',    // 深淡紫色
+      DEFAULT: '#A888B5', // Soft Purple
+      light: '#B599C0',   // Lighter Purple
+      dark: '#9B77AA',    // Darker Purple
     },
     accent: {
-      DEFAULT: '#EFB6C8', // 粉色
-      light: '#F4C5D4',   // 浅粉色
-      dark: '#EAA7BC',    // 深粉色
+      DEFAULT: '#EFB6C8', // Pink
+      light: '#F4C5D4',   // Light Pink
+      dark: '#EAA7BC',    // Dark Pink
     },
     background: {
-      DEFAULT: '#FFD2A0', // 杏色
-      light: '#FFE1BD',   // 浅杏色
-      dark: '#FFC383',    // 深杏色
+      DEFAULT: '#FFD2A0', // Apricot
+      light: '#FFE1BD',   // Light Apricot
+      dark: '#FFC383',    // Dark Apricot
     }
   },
   fonts: {
@@ -67,27 +67,27 @@ export const theme = {
   },
 };
 
-// 动画配置
+// Animation Configuration
 export const animations = {
-  // 页面转场动画
+  // Page Transition
   pageTransition: {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -20 },
     transition: { duration: 0.3 },
   },
-  // 卡片悬浮动画
+  // Card Hover
   cardHover: {
     scale: 1.02,
     transition: { duration: 0.2 },
   },
-  // 图片加载动画
+  // Image Loading
   imageLoad: {
     initial: { opacity: 0, scale: 0.95 },
     animate: { opacity: 1, scale: 1 },
     transition: { duration: 0.3 },
   },
-  // 列表项动画
+  // List Item
   listItem: {
     initial: { opacity: 0, x: -20 },
     animate: { opacity: 1, x: 0 },
@@ -95,7 +95,7 @@ export const animations = {
   },
 };
 
-// 响应式布局配置
+// Responsive Layout Configuration
 export const responsive = {
   mobile: {
     maxWidth: '640px',

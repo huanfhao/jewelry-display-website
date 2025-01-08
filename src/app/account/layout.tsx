@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { User, Package, MapPin, LogOut } from 'lucide-react';
+import SignOutDialog from '@/components/account/SignOutDialog';
 
 const accountNavItems = [
   { href: '/account', label: 'Personal Info', icon: User },
@@ -39,11 +40,11 @@ export default function AccountLayout({
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row gap-8">
+    <div className="container mx-auto px-4 py-12">
+      <div className="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto">
         {/* Sidebar */}
-        <aside className="w-full md:w-64">
-          <div className="bg-white rounded-lg shadow p-6 space-y-2">
+        <aside className="w-full md:w-64 flex-shrink-0">
+          <div className="bg-white rounded-lg shadow-sm p-6 space-y-2 sticky top-24">
             <div className="pb-4 border-b">
               <h2 className="font-semibold">{session.user.name}</h2>
               <p className="text-sm text-gray-500">{session.user.email}</p>
@@ -62,20 +63,14 @@ export default function AccountLayout({
                   </Link>
                 );
               })}
-              <button
-                onClick={() => router.push('/api/auth/signout')}
-                className="flex items-center gap-2 w-full p-2 rounded-md hover:bg-gray-100 text-red-600"
-              >
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </button>
+              <SignOutDialog />
             </nav>
           </div>
         </aside>
 
         {/* Main Content */}
         <main className="flex-1">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow-sm p-6">
             {children}
           </div>
         </main>

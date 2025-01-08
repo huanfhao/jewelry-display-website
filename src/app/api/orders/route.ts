@@ -2,10 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { Resend } from 'resend';
 import { OrderStatus, Prisma } from '@prisma/client';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 type OrderWithItems = Prisma.OrderGetPayload<{
   include: {
@@ -113,62 +110,6 @@ export async function POST(request: Request) {
       where: { userId: session.user.id },
     });
 
-    // 发送订单确认邮件
-    const itemsList = order.items.map((item) => `
-      <tr>
-        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.product.name}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.quantity}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee;">¥${item.price.toFixed(2)}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee;">¥${(item.price * item.quantity).toFixed(2)}</td>
-      </tr>
-    `).join('');
-
-    await resend.emails.send({
-      from: 'SY Jewelry <onboarding@resend.dev>',
-      to: email,
-      subject: `订单确认 #${order.id}`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #333;">订单确认</h1>
-          <p>尊敬的 ${name}：</p>
-          <p>感谢您的订购！以下是您的订单详情：</p>
-          
-          <h2 style="color: #333;">订单信息</h2>
-          <p>订单号：${order.id}</p>
-          <p>下单时间：${order.createdAt.toLocaleString()}</p>
-          
-          <h2 style="color: #333;">商品清单</h2>
-          <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr style="background-color: #f8f9fa;">
-                <th style="padding: 10px; text-align: left;">商品</th>
-                <th style="padding: 10px; text-align: left;">数量</th>
-                <th style="padding: 10px; text-align: left;">单价</th>
-                <th style="padding: 10px; text-align: left;">小计</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${itemsList}
-            </tbody>
-          </table>
-          
-          <div style="margin-top: 20px;">
-            <p>商品总额：¥${(order.total - 10).toFixed(2)}</p>
-            <p>运费：¥10.00</p>
-            <p style="font-size: 18px; font-weight: bold;">实付金额：¥${order.total.toFixed(2)}</p>
-          </div>
-          
-          <h2 style="color: #333;">收货信息</h2>
-          <p>收货人：${name}</p>
-          <p>电话：${phone}</p>
-          <p>地址：${address}</p>
-          ${note ? `<p>备注：${note}</p>` : ''}
-          
-          <p style="margin-top: 30px;">我们会尽快处理您的订单。如有任何问题，请随时联系我们。</p>
-        </div>
-      `,
-    });
-
     return NextResponse.json(order);
   } catch (error: any) {
     console.error('Error creating order:', {
@@ -182,14 +123,6 @@ export async function POST(request: Request) {
     if (error?.name === 'PrismaClientKnownRequestError') {
       return NextResponse.json(
         { error: '数据库操作失败，请重试' },
-        { status: 500 }
-      );
-    }
-
-    // 如果是 Resend 错误，返回邮件发送失败信息
-    if (error?.name === 'ResendError') {
-      return NextResponse.json(
-        { error: '订单已创建，但邮件发送失败' },
         { status: 500 }
       );
     }

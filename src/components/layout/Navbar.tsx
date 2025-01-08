@@ -1,170 +1,167 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
-import { ShoppingCart, User, Menu, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { usePathname, useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, X, ShoppingBag, Heart, User, LogOut } from 'lucide-react';
+import { useSession, signOut } from 'next-auth/react';
+
+const MENU_ITEMS = [
+  { href: '/', label: 'Home' },
+  { href: '/products', label: 'Shop' },
+  { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
+];
 
 export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
   const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    // Fetch cart count
+    const fetchCartCount = async () => {
+      try {
+        const response = await fetch('/api/cart/count');
+        if (response.ok) {
+          const data = await response.json();
+          setCartCount(data.count);
+        }
+      } catch (error) {
+        console.error('Error fetching cart count:', error);
+      }
+    };
+
+    // 初始加载时获取购物车数量
+    fetchCartCount();
+
+    // 创建一个定时器，每5秒更新一次购物车数量
+    const interval = setInterval(fetchCartCount, 5000);
+
+    // 清理定时器
+    return () => clearInterval(interval);
+  }, []);
+
+  // 添加一个手动刷新购物车数量的方法
+  const refreshCartCount = async () => {
+    try {
+      const response = await fetch('/api/cart/count');
+      if (response.ok) {
+        const data = await response.json();
+        setCartCount(data.count);
+      }
+    } catch (error) {
+      console.error('Error fetching cart count:', error);
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
+    router.push('/login?signedOut=true');
+  };
 
   return (
-    <nav className="bg-primary/10 backdrop-blur-md fixed w-full top-0 z-50 border-b border-primary/20">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-20">
+    <header className="fixed top-0 inset-x-0 z-50 bg-white shadow-sm">
+      <nav className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link 
-            href="/" 
-            className="text-2xl font-serif font-bold text-primary hover:text-primary/80 transition-colors"
-          >
-            SY Jewelry
+          <Link href="/" className="flex items-baseline space-x-2">
+            <span className="text-2xl font-playfair text-primary tracking-wider">SY</span>
+            <span className="text-lg text-gray-600 font-light tracking-wide">Jewelry Display</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-12">
-            <Link 
-              href="/" 
-              className="text-primary/80 hover:text-primary transition-colors duration-200 text-sm font-medium"
-            >
-              Home
-            </Link>
-            <Link 
-              href="/products" 
-              className="text-primary/80 hover:text-primary transition-colors duration-200 text-sm font-medium"
-            >
-              All Products
-            </Link>
-            <Link 
-              href="/about" 
-              className="text-primary/80 hover:text-primary transition-colors duration-200 text-sm font-medium"
-            >
-              About Us
-            </Link>
-            <Link 
-              href="/contact" 
-              className="text-primary/80 hover:text-primary transition-colors duration-200 text-sm font-medium"
-            >
-              Contact Us
-            </Link>
+          <div className="hidden md:flex items-center space-x-8">
+            {MENU_ITEMS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`text-gray-600 hover:text-primary transition-colors ${
+                  pathname === item.href ? 'text-primary font-medium' : ''
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
           </div>
 
-          {/* User Actions */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link href="/cart">
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="hover:bg-primary/10 text-primary/80 hover:text-primary transition-colors"
-              >
-                <ShoppingCart className="h-5 w-5" />
-              </Button>
+          {/* Action Buttons */}
+          <div className="flex items-center space-x-4">
+            <Link href="/wishlist" className="p-2 text-gray-600 hover:text-primary transition-colors">
+              <Heart className="w-5 h-5" />
+            </Link>
+            <Link href="/cart" className="p-2 text-gray-600 hover:text-primary transition-colors relative">
+              <ShoppingBag className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-white text-xs rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
             </Link>
             {session ? (
-              <Link href="/account">
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="hover:bg-primary/10 text-primary/80 hover:text-primary transition-colors"
+              <>
+                <Link href="/account" className="p-2 text-gray-600 hover:text-primary transition-colors">
+                  <User className="w-5 h-5" />
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 text-gray-600 hover:text-primary transition-colors"
                 >
-                  <User className="h-5 w-5" />
-                </Button>
-              </Link>
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </>
             ) : (
-              <Link href="/login">
-                <Button 
-                  variant="default"
-                  className="bg-accent hover:bg-accent/90 text-primary font-medium px-6 hover:shadow-md transition-all duration-300"
-                >
-                  Login
-                </Button>
+              <Link href="/login" className="p-2 text-gray-600 hover:text-primary transition-colors">
+                <User className="w-5 h-5" />
               </Link>
             )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
+            <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="hover:bg-primary/10 text-primary/80 hover:text-primary transition-colors"
+              className="p-2 md:hidden text-gray-600 hover:text-primary transition-colors"
             >
-              {isMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </Button>
+              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
+      </nav>
 
-        {/* Mobile Menu */}
+      {/* Mobile Menu */}
+      <AnimatePresence>
         {isMenuOpen && (
-          <div className="md:hidden py-4 animate-slide-in-right bg-background/95 backdrop-blur-md">
-            <div className="flex flex-col space-y-4">
-              <Link
-                href="/"
-                className="text-primary/80 hover:text-primary hover:bg-primary/5 px-4 py-3 rounded-md transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Home
-              </Link>
-              <Link
-                href="/products"
-                className="text-primary/80 hover:text-primary hover:bg-primary/5 px-4 py-3 rounded-md transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                All Products
-              </Link>
-              <Link
-                href="/about"
-                className="text-primary/80 hover:text-primary hover:bg-primary/5 px-4 py-3 rounded-md transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                About Us
-              </Link>
-              <Link
-                href="/contact"
-                className="text-primary/80 hover:text-primary hover:bg-primary/5 px-4 py-3 rounded-md transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Contact Us
-              </Link>
-              <div className="border-t border-primary/10 pt-4">
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-white border-t"
+          >
+            <div className="container mx-auto px-4 py-4 space-y-4">
+              {MENU_ITEMS.map((item) => (
                 <Link
-                  href="/cart"
-                  className="flex items-center text-primary/80 hover:text-primary hover:bg-primary/5 px-4 py-3 rounded-md transition-colors"
+                  key={item.href}
+                  href={item.href}
+                  className={`block py-2 text-gray-600 hover:text-primary transition-colors ${
+                    pathname === item.href ? 'text-primary font-medium' : ''
+                  }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <ShoppingCart className="h-5 w-5 mr-2" />
-                  Cart
+                  {item.label}
                 </Link>
-                {session ? (
-                  <Link
-                    href="/account"
-                    className="flex items-center text-primary/80 hover:text-primary hover:bg-primary/5 px-4 py-3 rounded-md transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <User className="h-5 w-5 mr-2" />
-                    My Account
-                  </Link>
-                ) : (
-                  <Link
-                    href="/login"
-                    className="flex items-center text-primary/80 hover:text-primary hover:bg-primary/5 px-4 py-3 rounded-md transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <User className="h-5 w-5 mr-2" />
-                    Login
-                  </Link>
-                )}
-              </div>
+              ))}
+              {session && (
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left py-2 text-gray-600 hover:text-primary transition-colors"
+                >
+                  Logout
+                </button>
+              )}
             </div>
-          </div>
+          </motion.div>
         )}
-      </div>
-    </nav>
+      </AnimatePresence>
+    </header>
   );
 } 

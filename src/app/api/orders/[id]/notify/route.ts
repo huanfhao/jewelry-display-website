@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
+import { formatPrice } from '@/lib/utils';
 
 // 创建邮件传输器
 const transporter = nodemailer.createTransport({
@@ -77,8 +78,8 @@ export async function POST(
       <tr>
         <td>${item.product.name}</td>
         <td>${item.quantity}</td>
-        <td>¥${item.price.toFixed(2)}</td>
-        <td>¥${(item.price * item.quantity).toFixed(2)}</td>
+        <td>${formatPrice(item.price)}</td>
+        <td>${formatPrice(item.price * item.quantity)}</td>
       </tr>
     `).join('');
 
@@ -106,8 +107,8 @@ export async function POST(
           </tr>
           ${itemsHtml}
           <tr>
-            <td colspan="3" align="right"><strong>总计：</strong></td>
-            <td><strong>¥${order.total.toFixed(2)}</strong></td>
+            <td colspan="3"><strong>Total</strong></td>
+            <td><strong>${formatPrice(order.total)}</strong></td>
           </tr>
         </table>
       `,

@@ -1,90 +1,92 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-import type { Category } from '@prisma/client';
-import { useState, useTransition } from 'react';
+import React from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Category } from '@prisma/client'
+import { Search } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 
 interface ProductFilterProps {
-  categories: Category[];
-  selectedCategory?: string;
-  searchQuery?: string;
+  categories: Category[]
+  selectedCategory?: string
+  searchQuery?: string
 }
 
-export default function ProductFilter({
-  categories,
-  selectedCategory,
-  searchQuery = '',
-}: ProductFilterProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
-  const [search, setSearch] = useState(searchQuery);
+export default function ProductFilter({ categories, selectedCategory, searchQuery }: ProductFilterProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
   const handleCategoryChange = (categoryId: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (categoryId === selectedCategory) {
-      params.delete('category');
+    const params = new URLSearchParams(searchParams.toString())
+    if (categoryId === 'all') {
+      params.delete('category')
     } else {
-      params.set('category', categoryId);
+      params.set('category', categoryId)
     }
-    startTransition(() => {
-      router.push(`/products?${params.toString()}`);
-    });
-  };
+    params.delete('page') // 重置页码
+    router.push(`/products?${params.toString()}`)
+  }
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const params = new URLSearchParams(searchParams.toString());
+  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    const search = formData.get('search') as string
+    
+    const params = new URLSearchParams(searchParams.toString())
     if (search) {
-      params.set('search', search);
+      params.set('search', search)
     } else {
-      params.delete('search');
+      params.delete('search')
     }
-    startTransition(() => {
-      router.push(`/products?${params.toString()}`);
-    });
-  };
+    params.delete('page') // 重置页码
+    router.push(`/products?${params.toString()}`)
+  }
 
   return (
-    <div className="space-y-6">
+    <Card className="p-6 space-y-8">
       <div>
-        <h3 className="text-lg font-semibold mb-4">Search</h3>
-        <form onSubmit={handleSearch} className="space-y-2">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search products..."
-            className="w-full px-3 py-2 border rounded-md"
-          />
-          <button
-            type="submit"
-            disabled={isPending}
-            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-          >
-            {isPending ? 'Searching...' : 'Search'}
-          </button>
+        <h3 className="text-lg font-semibold mb-4">Search Products</h3>
+        <form onSubmit={handleSearch} className="space-y-4">
+          <div className="relative">
+            <Input
+              type="text"
+              name="search"
+              defaultValue={searchQuery}
+              placeholder="Search products..."
+              className="pl-10"
+            />
+            <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+          </div>
+          <Button type="submit" className="w-full">
+            Search
+          </Button>
         </form>
       </div>
 
       <div>
         <h3 className="text-lg font-semibold mb-4">Categories</h3>
         <div className="space-y-2">
+          <Button
+            variant={!selectedCategory ? "default" : "outline"}
+            onClick={() => handleCategoryChange('all')}
+            className="w-full justify-start"
+          >
+            All Categories
+          </Button>
           {categories.map((category) => (
-            <button
+            <Button
               key={category.id}
+              variant={selectedCategory === category.id ? "default" : "outline"}
               onClick={() => handleCategoryChange(category.id)}
-              className={`w-full px-4 py-2 text-left rounded-md hover:bg-gray-100 ${
-                category.id === selectedCategory
-                  ? 'bg-blue-50 text-blue-600'
-                  : ''
-              }`}
+              className="w-full justify-start"
             >
               {category.name}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
-    </div>
-  );
+    </Card>
+  )
 }

@@ -14,10 +14,15 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isReturnUser, setIsReturnUser] = useState(false);
 
   useEffect(() => {
     if (searchParams.get('registered')) {
       setSuccess('Registration successful! Please login with your new account.');
+    }
+    // 检查是否是退出登录后返回
+    if (searchParams.get('signedOut')) {
+      setIsReturnUser(true);
     }
   }, [searchParams]);
 
@@ -58,11 +63,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-16">
       <div className="max-w-md mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl text-center">Login</CardTitle>
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-2xl text-center font-bold">
+              {isReturnUser ? 'Welcome Back' : 'Sign In'}
+            </CardTitle>
+            <p className="text-center text-gray-500 mt-1">
+              {isReturnUser 
+                ? 'Please sign in to continue shopping'
+                : 'Please sign in to your account'}
+            </p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -109,7 +121,7 @@ export default function LoginPage() {
                 className="w-full"
                 disabled={loading}
               >
-                {loading ? 'Logging in...' : 'Login'}
+                {loading ? 'Logging in...' : 'Sign In'}
               </Button>
 
               <div className="text-center text-sm">
