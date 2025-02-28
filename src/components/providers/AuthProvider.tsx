@@ -1,19 +1,12 @@
 'use client';
 
-import { useNavigationLoading } from '@/hooks/useNavigationLoading';
-import { Toaster } from 'sonner';
+import { SessionProvider } from 'next-auth/react'
+import { ReactNode } from 'react'
 
-export default function AuthProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  useNavigationLoading();
+interface AuthProviderProps {
+  children: ReactNode
+}
 
-  return (
-    <>
-      {children}
-      <Toaster richColors position="top-center" />
-    </>
-  );
+export default function AuthProvider({ children }: AuthProviderProps) {
+  return <SessionProvider>{children}</SessionProvider>
 } 

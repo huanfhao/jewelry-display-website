@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
-import { User } from '@prisma/client'
+import type { User, UserRole } from '@/types'
 import AdminHeader from '@/components/admin/AdminHeader'
 
 export default function UsersPage() {
@@ -27,7 +27,7 @@ export default function UsersPage() {
     }
   }
 
-  async function handleRoleChange(userId: string, newRole: string) {
+  async function handleRoleChange(userId: string, newRole: UserRole) {
     try {
       const response = await fetch('/api/admin/users', {
         method: 'PATCH',
@@ -119,7 +119,7 @@ export default function UsersPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <select
                         value={user.role}
-                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                        onChange={(e) => handleRoleChange(user.id, e.target.value as UserRole)}
                         className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                       >
                         <option value="USER">User</option>

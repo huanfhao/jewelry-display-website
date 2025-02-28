@@ -4,8 +4,7 @@ import './globals.css';
 import 'nprogress/nprogress.css';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import AuthProvider from '@/components/providers/AuthProvider';
-import { Toaster } from 'sonner';
+import Providers from '@/components/providers/Providers';
 
 const inter = Inter({ subsets: ['latin'] });
 const playfair = Playfair_Display({ 
@@ -54,7 +53,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className={`${inter.className} ${playfair.variable} antialiased`}>
-        <AuthProvider>
+        <Providers>
           <div className="min-h-screen flex flex-col">
             <Navbar />
             <main className="flex-grow">
@@ -62,8 +61,7 @@ export default function RootLayout({
             </main>
             <Footer />
           </div>
-          <Toaster richColors position="top-center" />
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   );

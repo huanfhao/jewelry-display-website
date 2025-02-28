@@ -1,12 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: [
-      'images.unsplash.com',
-      'res.cloudinary.com',
-      'placehold.co',
-      'plus.unsplash.com'
-    ],
+    domains: ['res.cloudinary.com'],
     unoptimized: process.env.NODE_ENV !== 'production'
   },
   typescript: {
