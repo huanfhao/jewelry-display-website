@@ -1,88 +1,74 @@
 'use client'
 
-import React from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
+import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import heroImage from '../../../public/images/about.jpg'
+
+const STORE_URL = 'https://store.flylinking.com/s/2UPEH35FWO';
 
 export default function Hero() {
-  return (
-    <div className="relative min-h-screen">
-      {/* Left Content */}
-      <div className="absolute inset-0 w-1/2 flex items-center justify-center p-12">
-        <div className="max-w-xl">
-          <motion.h1 
-            className="text-6xl font-light mb-8 leading-tight"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <span className="block">Professional</span>
-            <span className="block font-semibold">Jewelry Display</span>
-          </motion.h1>
-          
-          <motion.p 
-            className="text-lg text-gray-600 mb-12 leading-relaxed"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            Creating distinctive display solutions for your jewelry store. We specialize in custom showcase design and professional display equipment to enhance the presentation of each piece.
-          </motion.p>
+  const [imgError, setImgError] = useState(false)
 
+  const handleViewProducts = () => {
+    window.open(STORE_URL, '_blank');
+  };
+
+  return (
+    <div className="relative h-[90vh] md:h-[80vh] overflow-hidden">
+      {/* Background Image */}
+      {imgError ? (
+        // 显示备用背景色或图片
+        <div className="absolute inset-0 bg-gray-900" />
+      ) : (
+        <Image
+          src={heroImage}
+          alt="SY Jewelry Display"
+          fill
+          className="object-cover object-center"
+          priority
+          sizes="100vw"
+          quality={90}
+          onError={(e) => {
+            console.error('Image load error:', e);
+            console.log('Attempted image path:', '/images/about.jpg');
+            setImgError(true);
+          }}
+          onLoad={() => {
+            console.log('Image loaded successfully');
+          }}
+        />
+      )}
+      
+      {/* Content */}
+      <div className="absolute inset-0 bg-black/30">
+        <div className="container mx-auto h-full px-4 flex items-center">
           <motion.div
-            className="space-x-6"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="w-full md:max-w-2xl text-white text-center md:text-left"
           >
-            <Link 
-              href="/products" 
-              className="text-lg border-b-2 border-black pb-1 hover:border-gray-400 transition-colors"
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-playfair mb-4 md:mb-6">
+              Professional
+              <br className="md:hidden" />
+              Display Props
+            </h1>
+            <p className="text-base md:text-lg lg:text-xl mb-6 md:mb-8 text-gray-100">
+              Enhance your jewelry presentation with our
+              <br className="hidden md:block" />
+              premium display props and accessories
+            </p>
+            <Button
+              size="lg"
+              onClick={handleViewProducts}
+              className="w-full md:w-auto bg-white text-black hover:bg-gray-100"
             >
               View Products
-            </Link>
-            <Link 
-              href="/about" 
-              className="text-lg border-b-2 border-transparent pb-1 hover:border-black transition-colors"
-            >
-              About Us
-            </Link>
+            </Button>
           </motion.div>
         </div>
-      </div>
-
-      {/* Right Image */}
-      <div className="absolute right-0 top-0 bottom-0 w-1/2">
-        <div className="relative h-full">
-          <Image
-            src="https://images.unsplash.com/photo-1584302179602-e4c3d3fd629d"
-            alt="Professional Jewelry Display"
-            fill
-            className="object-cover"
-            priority
-            quality={100}
-            sizes="50vw"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = '/images/placeholder.jpg';
-            }}
-          />
-          <div className="absolute inset-0 bg-black/10" />
-        </div>
-      </div>
-
-      {/* Decorative Elements */}
-      <div className="absolute bottom-12 left-12">
-        <motion.div 
-          className="flex items-center space-x-4 text-sm"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-        >
-          <span className="w-12 h-[1px] bg-gray-400" />
-          <span className="text-gray-400">Custom Design · Elegant Presentation</span>
-        </motion.div>
       </div>
     </div>
   )

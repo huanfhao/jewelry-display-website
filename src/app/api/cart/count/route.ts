@@ -7,21 +7,15 @@ import { prisma } from '@/lib/prisma';
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ count: 0 });
     }
 
-    // 获取购物车商品总数量
-    const cartItems = await prisma.cartItem.findMany({
+    const count = await prisma.cartItem.count({
       where: {
-        userId: session.user.id,
-      },
-      select: {
-        quantity: true,
-      },
+        userId: session.user.id
+      }
     });
-
-    const count = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
     return NextResponse.json({ count });
   } catch (error) {

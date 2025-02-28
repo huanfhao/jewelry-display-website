@@ -7,6 +7,11 @@ import CartItem from '@/components/cart/CartItem'
 import CartSummary from '@/components/cart/CartSummary'
 import EmptyCart from '@/components/cart/EmptyCart'
 import { toast } from 'sonner'
+import { useSession } from 'next-auth/react'
+import { Button } from '@/components/ui/button'
+import { useToast } from '@/components/ui/use-toast'
+import { formatPrice } from '@/lib/utils'
+import Image from 'next/image'
 
 interface CartProduct {
   id: string
@@ -18,7 +23,9 @@ interface CartProduct {
 }
 
 export default function CartPage() {
+  const { data: session } = useSession()
   const router = useRouter()
+  const { toast } = useToast()
   const [cartItems, setCartItems] = useState<CartProduct[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -26,8 +33,12 @@ export default function CartPage() {
   const [pendingUpdates, setPendingUpdates] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
-    fetchCartItems()
-  }, [])
+    if (session?.user) {
+      fetchCartItems()
+    } else {
+      setLoading(false)
+    }
+  }, [session])
 
   async function fetchCartItems() {
     try {
@@ -153,10 +164,21 @@ export default function CartPage() {
     }
   }
 
+  if (!session) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h2 className="text-2xl font-bold mb-4">请先登录</h2>
+        <Button onClick={() => router.push('/login')}>
+          去登录
+        </Button>
+      </div>
+    )
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin" />
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
       </div>
     )
   }
@@ -228,6 +250,18 @@ export default function CartPage() {
                 disabled={isProcessing || Object.values(pendingUpdates).some(Boolean)}
               />
             </div>
+          </div>
+
+          <div className="mt-8 flex flex-col items-end gap-4">
+            <div className="text-xl font-bold">
+              总计：{formatPrice(total)}
+            </div>
+            <Button
+              size="lg"
+              onClick={() => router.push('/checkout')}
+            >
+              去结算
+            </Button>
           </div>
         </div>
       </div>

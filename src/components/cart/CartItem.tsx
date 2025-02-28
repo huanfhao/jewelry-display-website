@@ -6,7 +6,8 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Minus, Plus, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
+import { cn, formatPrice } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 interface CartItemProps {
   id: string
@@ -16,8 +17,8 @@ interface CartItemProps {
   image: string
   maxQuantity: number
   isUpdating?: boolean
-  onUpdateQuantity: (quantity: number) => Promise<void>
-  onRemove: () => Promise<void>
+  onUpdateQuantity: (quantity: number) => void
+  onRemove: () => void
 }
 
 export default function CartItem({
@@ -68,73 +69,53 @@ export default function CartItem({
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className={cn(
-        "flex items-center gap-6 p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all",
-        isUpdating && "opacity-50"
-      )}
+      exit={{ opacity: 0, x: -100 }}
+      className="flex items-center gap-4 p-4 bg-white rounded-lg shadow mb-4"
     >
-      {/* 商品图片 */}
-      <Link href={`/products/${id}`} className="shrink-0">
-        <div className="relative w-32 h-32 overflow-hidden rounded-lg">
-          <Image
-            src={image}
-            alt={name}
-            fill
-            className="object-cover transform hover:scale-105 transition-transform duration-300"
-          />
-        </div>
-      </Link>
-
-      {/* 商品信息 */}
-      <div className="flex-grow min-w-0">
-        <Link href={`/products/${id}`}>
-          <h3 className="text-xl font-medium truncate hover:text-primary transition-colors">
-            {name}
-          </h3>
-        </Link>
-        <p className="text-lg font-medium text-primary mt-2">${price.toLocaleString()}</p>
-      </div>
-
-      {/* 数量控制 */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => onUpdateQuantity(quantity - 1)}
-          disabled={isUpdating || quantity <= 1}
-          className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-gray-50 transition-colors"
-        >
-          <Minus className="w-4 h-4" />
-        </button>
-        <Input
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          onBlur={handleInputBlur}
-          disabled={isUpdating}
-          className="w-16 text-center"
+      <div className="relative w-20 h-20">
+        <Image
+          src={image}
+          alt={name}
+          fill
+          className="object-cover rounded"
+          sizes="80px"
         />
-        <button
-          onClick={() => onUpdateQuantity(quantity + 1)}
-          disabled={isUpdating || quantity >= maxQuantity}
-          className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-gray-50 transition-colors"
+      </div>
+
+      <div className="flex-1">
+        <h3 className="font-medium">{name}</h3>
+        <p className="text-gray-600">{formatPrice(price)}</p>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="icon"
+          disabled={quantity <= 1 || isUpdating}
+          onClick={() => onUpdateQuantity(quantity - 1)}
         >
-          <Plus className="w-4 h-4" />
-        </button>
+          <Minus className="h-4 w-4" />
+        </Button>
+        <span className="w-8 text-center">{quantity}</span>
+        <Button
+          variant="outline"
+          size="icon"
+          disabled={quantity >= maxQuantity || isUpdating}
+          onClick={() => onUpdateQuantity(quantity + 1)}
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
       </div>
 
-      {/* 小计 */}
-      <div className="w-32 text-right">
-        <p className="text-lg font-medium">${(price * quantity).toLocaleString()}</p>
-      </div>
-
-      {/* 删除按钮 */}
-      <button
-        onClick={onRemove}
+      <Button
+        variant="ghost"
+        size="icon"
         disabled={isUpdating}
-        className="p-2 text-gray-400 hover:text-red-500 disabled:opacity-50 disabled:hover:text-gray-400 transition-colors"
+        onClick={onRemove}
+        className="text-gray-400 hover:text-gray-600"
       >
-        <X className="w-6 h-6" />
-      </button>
+        <X className="h-4 w-4" />
+      </Button>
     </motion.div>
   )
 } 

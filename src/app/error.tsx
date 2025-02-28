@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { Button } from '@/components/ui/button'
 
 export default function Error({
   error,
@@ -15,14 +16,14 @@ export default function Error({
   }, [error])
 
   return (
-    <div className="flex min-h-[400px] flex-col items-center justify-center">
-      <h2 className="text-2xl font-semibold">Something went wrong!</h2>
-      <button
-        className="mt-4 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-        onClick={() => reset()}
-      >
-        Try again
-      </button>
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="text-center">
+        <h2 className="text-2xl font-playfair mb-4">Something went wrong!</h2>
+        <p className="text-gray-600 mb-8">
+          We apologize for the inconvenience. Please try again.
+        </p>
+        <Button onClick={reset}>Try again</Button>
+      </div>
     </div>
   )
 } 

@@ -114,3 +114,41 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Prisma](https://www.prisma.io/)
 - [NextAuth.js](https://next-auth.js.org/)
 - [Framer Motion](https://www.framer.com/motion/)
+
+## Database Deployment
+
+This project uses Neon - a serverless PostgreSQL database service.
+
+### Neon Database Setup
+1. Go to [Neon](https://neon.tech) and sign in
+2. Create a new project or select existing one
+3. Get your connection string from the dashboard
+4. Update your `.env` file with the connection string:
+   ```env
+   DATABASE_URL="postgres://[user].[project-id].neon.tech/neondb?sslmode=require"
+   ```
+5. Run database migrations:
+   ```bash
+   npx prisma migrate deploy
+   ```
+
+> Note: Make sure to enable "Pooling mode" in your Neon project settings for better performance in production.
+
+## Database Deployment
+
+This project uses a cloud-hosted PostgreSQL database. We recommend using one of these services:
+
+### Option 1: Supabase
+1. Create a new project on [Supabase](https://supabase.com)
+2. Get your database connection string from the project settings
+3. Update your `.env` file with the connection string
+
+### Option 2: Railway
+1. Create a new project on [Railway](https://railway.app)
+2. Add a PostgreSQL database to your project
+3. Copy the connection string to your `.env` file
+
+### Option 3: Neon
+1. Create a new project on [Neon](https://neon.tech)
+2. Get your connection string from the dashboard
+3. Update your `.env` file

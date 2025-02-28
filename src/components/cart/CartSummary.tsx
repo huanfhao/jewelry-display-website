@@ -11,7 +11,7 @@ interface CartSummaryProps {
   subtotal: number
   shipping: number
   total: number
-  onCheckout: () => Promise<void>
+  onCheckout: () => void
   disabled?: boolean
 }
 
@@ -68,45 +68,39 @@ export default function CartSummary({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white p-8 rounded-xl shadow-sm"
+      className="bg-gray-50 p-6 rounded-lg"
     >
-      <h2 className="text-2xl font-semibold mb-8">Order Summary</h2>
-
-      <div className="space-y-4 text-base">
+      <h2 className="text-lg font-medium mb-4">订单摘要</h2>
+      
+      <div className="space-y-2 text-sm">
         <div className="flex justify-between">
-          <span className="text-gray-600">Subtotal</span>
-          <span className="font-medium">{formatPrice(subtotal)}</span>
+          <span>小计</span>
+          <span>{formatPrice(subtotal)}</span>
         </div>
-
         <div className="flex justify-between">
-          <span className="text-gray-600">Shipping</span>
-          <span className="font-medium">{shipping === 0 ? 'Free' : formatPrice(shipping)}</span>
+          <span>运费</span>
+          <span>{shipping === 0 ? '免运费' : formatPrice(shipping)}</span>
         </div>
-
-        {subtotal < 10000 && (
-          <div className="py-3 px-4 bg-blue-50 text-blue-700 rounded-lg text-sm">
-            Add {formatPrice(10000 - subtotal)} more to get free shipping
-          </div>
-        )}
-
-        <div className="border-t border-gray-100 pt-4 mt-4">
-          <div className="flex justify-between text-lg font-semibold">
-            <span>Total</span>
-            <span>{formatPrice(total)}</span>
-          </div>
-          <p className="text-sm text-gray-500 mt-2">
-            * After clicking "Send Order", the order details will be sent to your email for manual processing.
+        {shipping > 0 && (
+          <p className="text-xs text-gray-500">
+            消费满{formatPrice(10000)}免运费
           </p>
-        </div>
+        )}
+      </div>
+
+      <div className="border-t border-gray-200 my-4" />
+
+      <div className="flex justify-between font-medium mb-6">
+        <span>总计</span>
+        <span>{formatPrice(total)}</span>
       </div>
 
       <Button
         onClick={handleCheckout}
         disabled={disabled || isProcessing}
-        className="w-full mt-8"
-        size="lg"
+        className="w-full"
       >
-        {isProcessing ? 'Processing...' : 'Send Order'}
+        {isProcessing ? 'Processing...' : '去结算'}
       </Button>
     </motion.div>
   )

@@ -12,22 +12,24 @@ datasource db {
 
 // 用户表
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  password      String
-  role          UserRole  @default(USER)
-  orders        Order[]
-  addresses     Address[]
-  cartItems     CartItem[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 添加反向关联
+  orders    Order[]
+  addresses Address[]
+  cartItems CartItem[]
 }
 
 // 产品表
 model Product {
   id          String      @id @default(cuid())
-  name        String
+  name        String      @unique
   description String
   price       Float
   images      String[]
@@ -45,6 +47,7 @@ model Product {
 model Category {
   id          String    @id @default(cuid())
   name        String
+  slug        String    @unique
   description String?
   products    Product[]
   createdAt   DateTime  @default(now())
@@ -53,33 +56,37 @@ model Category {
 
 // 订单表
 model Order {
-  id              String      @id @default(cuid())
-  userId          String
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  total           Float
-  status          OrderStatus @default(PENDING)
-  shippingName    String
-  shippingPhone   String
+  id             String      @id @default(cuid())
+  userId         String
+  total          Float
+  status         OrderStatus @default(PENDING)
+  shippingName   String
+  shippingPhone  String
   shippingAddress String
-  note            String?
-  items           OrderItem[]
-  user            User        @relation(fields: [userId], references: [id])
+  note           String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  // 关联
+  user           User        @relation(fields: [userId], references: [id])
+  items          OrderItem[]
 
   @@index([userId])
 }
 
 // 订单项表
 model OrderItem {
-  id          String    @id @default(cuid())
-  order       Order     @relation(fields: [orderId], references: [id])
-  orderId     String
-  product     Product   @relation(fields: [productId], references: [id])
-  productId   String
-  quantity    Int
-  price       Float
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联
+  order     Order    @relation(fields: [orderId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
 
   @@index([orderId])
   @@index([productId])
@@ -119,9 +126,10 @@ model CartItem {
   @@index([productId])
 }
 
+// 订单状态枚举
 enum OrderStatus {
   PENDING
-  CONFIRMED
+  PROCESSING
   SHIPPED
   DELIVERED
   CANCELLED
@@ -130,4 +138,15 @@ enum OrderStatus {
 enum UserRole {
   ADMIN
   USER
+}
+
+// 联系消息表
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -7,8 +7,9 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Package, ShoppingBag, Tag } from 'lucide-react';
+import { prisma } from '@/lib/prisma';
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -43,9 +44,15 @@ export default function AdminDashboard() {
     },
   ];
 
+  // 获取未读消息数量
+  const unreadCount = await prisma.contactMessage.count({
+    where: { read: false }
+  });
+
   return (
-    <div className="p-6">
+    <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
+      <p>Welcome to the admin dashboard.</p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {quickLinks.map((link) => {
@@ -86,6 +93,13 @@ export default function AdminDashboard() {
             </div>
           </div>
         </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h3 className="text-lg font-medium mb-2">Unread Messages</h3>
+          <p className="text-3xl font-bold text-primary">{unreadCount}</p>
+        </div>
       </div>
     </div>
   );

@@ -123,65 +123,63 @@ export async function DELETE(req: Request) {
 }
 
 // 添加商品到购物车
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return new NextResponse('Unauthorized', { status: 401 });
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: '请先登录' },
+        { status: 401 }
+      )
     }
 
-    const { productId, quantity } = await req.json();
+    const { productId, quantity } = await request.json()
 
-    // 验证商品库存
+    // 检查商品是否存在及库存
     const product = await prisma.product.findUnique({
-      where: { id: productId },
-    });
+      where: { id: productId }
+    })
 
     if (!product) {
-      return new NextResponse('Product not found', { status: 404 });
+      return NextResponse.json(
+        { error: '商品不存在' },
+        { status: 404 }
+      )
     }
 
-    if (quantity > product.stock) {
-      return new NextResponse('Not enough stock', { status: 400 });
+    if (product.stock < quantity) {
+      return NextResponse.json(
+        { error: '库存不足' },
+        { status: 400 }
+      )
     }
 
-    // 检查商品是否已在购物车中
-    const existingItem = await prisma.cartItem.findFirst({
+    // 更新或创建购物车项
+    const cartItem = await prisma.cartItem.upsert({
       where: {
-        userId: session.user.id,
-        productId: productId,
-      },
-    });
-
-    if (existingItem) {
-      // 如果商品已存在，更新数量
-      const newQuantity = existingItem.quantity + quantity;
-      if (newQuantity > product.stock) {
-        return new NextResponse('Not enough stock', { status: 400 });
-      }
-
-      await prisma.cartItem.update({
-        where: {
-          id: existingItem.id,
-        },
-        data: {
-          quantity: newQuantity,
-        },
-      });
-    } else {
-      // 如果商品不存在，创建新的购物车项
-      await prisma.cartItem.create({
-        data: {
+        userId_productId: {
           userId: session.user.id,
-          productId,
-          quantity,
-        },
-      });
-    }
+          productId
+        }
+      },
+      update: {
+        quantity: {
+          increment: quantity
+        }
+      },
+      create: {
+        userId: session.user.id,
+        productId,
+        quantity
+      }
+    })
 
-    return new NextResponse('Cart item added', { status: 200 });
+    return NextResponse.json(cartItem)
   } catch (error) {
-    console.error('Error adding cart item:', error);
-    return new NextResponse('Error adding cart item', { status: 500 });
+    console.error('Error adding to cart:', error)
+    return NextResponse.json(
+      { error: '添加到购物车失败' },
+      { status: 500 }
+    )
   }
 }

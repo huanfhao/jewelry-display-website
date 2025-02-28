@@ -2,18 +2,12 @@
 const nextConfig = {
   images: {
     domains: [
-      'res.cloudinary.com',
       'images.unsplash.com',
-      'localhost',
-      'via.placeholder.com',
+      'res.cloudinary.com',
       'placehold.co',
+      'plus.unsplash.com'
     ],
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
+    unoptimized: process.env.NODE_ENV !== 'production'
   },
   typescript: {
     ignoreBuildErrors: true

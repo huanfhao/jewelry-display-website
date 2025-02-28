@@ -1,109 +1,104 @@
-const { PrismaClient } = require('@prisma/client')
-const { hash } = require('bcryptjs')
+import { PrismaClient } from '@prisma/client'
+import { hash } from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
-  // 创建管理员用户
+  // 创建默认管理员账户
   const adminPassword = await hash('admin123', 12)
-  const admin = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: 'admin@example.com' },
     update: {},
     create: {
       email: 'admin@example.com',
       name: 'Admin',
       password: adminPassword,
-      role: 'ADMIN',
+      role: 'ADMIN'
     },
   })
 
-  // 创建商品分类
-  const ringCategory = await prisma.category.upsert({
-    where: { id: 'ring-category' },
-    update: {},
-    create: {
-      id: 'ring-category',
-      name: 'Rings',
-      description: 'Beautiful rings for every occasion',
-    },
-  })
+  // 创建基础产品分类
+  const categories = [
+    { id: 'necklace', name: '项链', slug: 'necklace', description: '精美项链系列' },
+    { id: 'ring', name: '戒指', slug: 'ring', description: '奢华戒指系列' },
+    { id: 'bracelet', name: '手链', slug: 'bracelet', description: '时尚手链系列' },
+    { id: 'earring', name: '耳饰', slug: 'earring', description: '优雅耳饰系列' }
+  ]
 
-  const earringCategory = await prisma.category.upsert({
-    where: { id: 'earring-category' },
-    update: {},
-    create: {
-      id: 'earring-category',
-      name: 'Earrings',
-      description: 'Elegant earrings for any style',
-    },
-  })
+  for (const category of categories) {
+    await prisma.category.upsert({
+      where: { id: category.id },
+      update: {},
+      create: category,
+    })
+  }
 
-  const necklaceCategory = await prisma.category.upsert({
-    where: { id: 'necklace-category' },
-    update: {},
-    create: {
-      id: 'necklace-category',
-      name: 'Necklaces',
-      description: 'Stunning necklaces for every occasion',
-    },
-  })
-
-  // 创建商品
-  const diamondRing = await prisma.product.upsert({
-    where: { id: 'diamond-ring' },
-    update: {},
-    create: {
-      id: 'diamond-ring',
-      name: 'Diamond Ring',
-      description: 'Beautiful diamond ring with 18K gold band',
-      price: 999.99,
+  // 在现有的 seed.ts 中修改商品数据
+  const products = [
+    {
+      name: '钻石项链',
+      description: '精美钻石项链，18K金链条',
+      price: 9999.99,
       images: [
-        '/images/products/ring1.jpg',
-        '/images/products/ring2.jpg'
+        'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338',
+        'https://images.unsplash.com/photo-1602173574767-37ac01994b2a'
       ],
-      categoryId: ringCategory.id,
+      categoryId: 'necklace',
       stock: 10,
-      isFeatured: true,
+      isFeatured: true
     },
-  })
-
-  const sapphireEarrings = await prisma.product.upsert({
-    where: { id: 'sapphire-earrings' },
-    update: {},
-    create: {
-      id: 'sapphire-earrings',
-      name: 'Sapphire Earrings',
-      description: 'Stunning sapphire earrings with diamond accents',
-      price: 599.99,
+    {
+      name: '蓝宝石戒指',
+      description: '奢华蓝宝石戒指，白金镶嵌',
+      price: 8888.99,
       images: [
-        '/images/products/earring1.jpg',
-        '/images/products/earring2.jpg'
+        'https://images.unsplash.com/photo-1605100804763-247f67b3557e',
+        'https://images.unsplash.com/photo-1603561591411-07134e71a2a9'
       ],
-      categoryId: earringCategory.id,
-      stock: 8,
-      isFeatured: true,
+      categoryId: 'ring',
+      stock: 5,
+      isFeatured: true
     },
-  })
-
-  const pearlNecklace = await prisma.product.upsert({
-    where: { id: 'pearl-necklace' },
-    update: {},
-    create: {
-      id: 'pearl-necklace',
-      name: 'Pearl Necklace',
-      description: 'Elegant pearl necklace with sterling silver chain',
-      price: 299.99,
+    {
+      name: '珍珠手链',
+      description: '天然珍珠手链，925银扣',
+      price: 3999.99,
       images: [
-        '/images/products/necklace1.jpg',
-        '/images/products/necklace2.jpg'
+        'https://images.unsplash.com/photo-1611085583191-a3b181a88401',
+        'https://images.unsplash.com/photo-1617038220319-276d3cfab638'
       ],
-      categoryId: necklaceCategory.id,
+      categoryId: 'bracelet',
       stock: 15,
-      isFeatured: true,
+      isFeatured: false
     },
-  })
+    {
+      name: '钻石耳环',
+      description: '优雅钻石耳环，18K玫瑰金',
+      price: 6999.99,
+      images: [
+        'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908',
+        'https://images.unsplash.com/photo-1598560917505-59a3ad559071'
+      ],
+      categoryId: 'earring',
+      stock: 8,
+      isFeatured: true
+    }
+  ]
 
-  console.log({ admin, ringCategory, earringCategory, necklaceCategory, diamondRing, sapphireEarrings, pearlNecklace })
+  // 修改商品创建逻辑
+  for (const product of products) {
+    const productId = `${product.categoryId}-${product.name.toLowerCase().replace(/\s+/g, '-')}`
+    await prisma.product.upsert({
+      where: { id: productId },
+      update: product,
+      create: {
+        id: productId,
+        ...product
+      },
+    })
+  }
+
+  console.log('Seed data created successfully')
 }
 
 main()
