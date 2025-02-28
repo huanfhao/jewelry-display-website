@@ -5,12 +5,10 @@ A modern e-commerce website for jewelry display and sales, built with Next.js 14
 ## Features
 
 - 🛍️ Product browsing and searching
-- 🛒 Shopping cart management
-- 👤 User authentication
+- 👤 User authentication and admin management
 - 📱 Responsive design
-- 💳 Manual checkout process
-- 📧 Order confirmation emails
 - 🎨 Beautiful UI with animations
+- 📧 Contact form with email notifications
 
 ## Tech Stack
 
@@ -86,12 +84,30 @@ yarn dev
 
 ```
 src/
-├── app/              # Next.js app directory
-├── components/       # React components
-├── lib/             # Utility functions and configurations
-├── hooks/           # Custom React hooks
-├── types/           # TypeScript type definitions
-└── styles/          # Global styles
+├── app/                    # Next.js app directory
+│   ├── (site)/            # Public site pages
+│   │   ├── about/         # About page
+│   │   └── products/      # Products pages
+│   ├── (auth)/            # Authentication pages
+│   │   ├── login/         # Login page
+│   │   └── register/      # Register page
+│   ├── admin/             # Admin dashboard
+│   │   ├── users/         # User management
+│   │   └── products/      # Product management
+│   └── api/               # API routes
+├── components/            # React components
+│   ├── ui/               # UI components
+│   ├── admin/            # Admin components
+│   ├── products/         # Product components
+│   └── layout/           # Layout components
+├── lib/                  # Utilities and configurations
+│   ├── prisma.ts        # Prisma client
+│   ├── auth.ts          # Auth configuration
+│   └── utils/           # Utility functions
+└── types/               # TypeScript type definitions
+    ├── auth/            # Auth types
+    ├── api/             # API types
+    └── products/        # Product types
 ```
 
 ## Contributing

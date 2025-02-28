@@ -4,9 +4,10 @@ import { prisma } from '@/lib/prisma';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const { name, email, message } = await req.json();
+    const body = await request.json();
+    const { name, email, message } = body;
 
     // 验证输入
     if (!name || !email || !message) {
@@ -17,11 +18,12 @@ export async function POST(req: Request) {
     }
 
     // 保存消息到数据库
-    const contactMessage = await prisma.contactMessage.create({
+    const newMessage = await prisma.contactMessage.create({
       data: {
         name,
         email,
         message,
+        read: false
       }
     });
 
@@ -53,12 +55,9 @@ export async function POST(req: Request) {
       `,
     });
 
-    return NextResponse.json({ success: true, message: contactMessage });
+    return NextResponse.json(newMessage);
   } catch (error) {
-    console.error('Contact form error:', error);
-    return NextResponse.json(
-      { error: 'Failed to send message' },
-      { status: 500 }
-    );
+    console.error('Error:', error);
+    return new NextResponse('Internal error', { status: 500 });
   }
 } 

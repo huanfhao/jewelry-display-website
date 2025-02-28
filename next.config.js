@@ -2,19 +2,25 @@
 const nextConfig = {
   images: {
     domains: ['res.cloudinary.com'],
-    unoptimized: process.env.NODE_ENV !== 'production'
+    unoptimized: false,
   },
   typescript: {
-    ignoreBuildErrors: process.env.NODE_ENV === 'development'
+    ignoreBuildErrors: true
   },
   eslint: {
-    ignoreDuringBuilds: process.env.NODE_ENV === 'development'
-  },
-  experimental: {
-    serverActions: true
+    ignoreDuringBuilds: true
   },
   output: 'standalone',
   productionBrowserSourceMaps: false,
+  compress: true,
+  swcMinify: true,
+  onDemandEntries: {
+    maxInactiveAge: 60 * 60 * 1000,
+    pagesBufferLength: 5,
+  },
+  experimental: {
+    optimizeCss: true,
+  },
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
