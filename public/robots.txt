@@ -1,26 +1,13 @@
+# *
 User-agent: *
 Allow: /
+Disallow: /api
+Disallow: /_next
+Disallow: /static
 
-# Block admin and API routes
-Disallow: /api/
-Disallow: /admin/
-Disallow: /messages/
+# Host
+Host: https://syjewelrydisplay.cn
 
-# Allow static assets
-Allow: /*.js$
-Allow: /*.css$
-Allow: /*.png$
-Allow: /*.jpg$
-Allow: /*.gif$
-Allow: /*.svg$
-Allow: /*.ico$
-Allow: /*.woff$
-Allow: /*.woff2$
-
-# Block specific files
-Disallow: /.env
-Disallow: /package.json
-Disallow: /package-lock.json
-
-# Sitemap
-Sitemap: https://syjewelrydisplay.cn/sitemap.xml 
+# Sitemaps
+Sitemap: https://syjewelrydisplay.cn/sitemap.xml
+Sitemap: https://syjewelrydisplay.cn/server-sitemap.xml

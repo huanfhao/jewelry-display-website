@@ -177,8 +177,8 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} antialiased`}>
-        <RouteChangeProvider />
         <Suspense fallback={<div>Loading...</div>}>
+          <RouteChangeProvider />
           <div className="min-h-screen flex flex-col">
             <Navbar />
             <main className="flex-grow">
@@ -186,8 +186,8 @@ export default function RootLayout({
             </main>
             <Footer />
           </div>
+          <AccessibilityWidget />
         </Suspense>
-        <AccessibilityWidget />
         <GoogleAnalytics />
         <VercelAnalytics />
       </body>
