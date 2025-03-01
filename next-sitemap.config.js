@@ -1,30 +1,34 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
   siteUrl: 'https://syjewelrydisplay.cn',
-  generateRobotsTxt: false, // 因为我们已经手动创建了 robots.txt
-  changefreq: 'weekly',
+  generateRobotsTxt: true,
+  changefreq: 'daily',
   priority: 0.7,
-  sitemapSize: 5000,
-  exclude: ['/admin/*', '/api/*'],
-  generateIndexSitemap: false,
-  // 移除 additionalPaths 配置，因为我们目前没有动态产品页面
-  // 或者使用静态产品列表
-  additionalPaths: async (config) => {
-    // 静态产品列表
-    const staticProducts = [
-      { slug: 'necklace-displays' },
-      { slug: 'ring-displays' },
-      { slug: 'bracelet-displays' },
-      { slug: 'earring-displays' },
-      { slug: 'jewelry-sets' },
-      { slug: 'custom-displays' }
-    ];
-
-    return staticProducts.map(product => ({
-      loc: `/products/${product.slug}`,
-      changefreq: 'weekly',
-      priority: 0.8,
+  sitemapSize: 7000,
+  exclude: ['/server-sitemap.xml'],
+  robotsTxtOptions: {
+    additionalSitemaps: [
+      'https://syjewelrydisplay.cn/server-sitemap.xml',
+    ],
+    policies: [
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow: ['/api', '/_next', '/static'],
+      },
+    ],
+  },
+  transform: async (config, path) => {
+    // 自定义优先级
+    const priority = path === '/' ? 1.0 : 
+                    path.startsWith('/products') ? 0.8 : 
+                    0.5;
+    
+    return {
+      loc: path,
+      changefreq: config.changefreq,
+      priority,
       lastmod: new Date().toISOString(),
-    }));
+    }
   },
 } 

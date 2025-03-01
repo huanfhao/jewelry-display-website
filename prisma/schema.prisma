@@ -32,3 +32,17 @@ model PerformanceMetric {
 
   @@map("performance_metrics")
 }
+
+model Product {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  image       String
+  price       Float?
+  slug        String   @unique
+  category    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("products")
+}
