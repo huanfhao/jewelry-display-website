@@ -9,7 +9,9 @@ import AccessibilityWidget from '@/components/accessibility/AccessibilityWidget'
 import RouteChangeProvider from '@/app/providers/RouteChangeProvider';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import { Analytics as VercelAnalytics } from '@vercel/analytics/react'
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Suspense } from 'react'
+import FacebookPixel from '@/components/analytics/FacebookPixel'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -190,6 +192,8 @@ export default function RootLayout({
         </Suspense>
         <GoogleAnalytics />
         <VercelAnalytics />
+        <SpeedInsights />
+        <FacebookPixel />
       </body>
     </html>
   );
