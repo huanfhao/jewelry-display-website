@@ -31,4 +31,22 @@ export function reportWebVitals(metric: WebVitalsMetric) {
   } catch (error) {
     console.error('Error reporting web vitals:', error)
   }
+}
+
+export function reportError(error: Error, componentStack?: string | null) {
+  console.error('Error:', error)
+  console.error('Component Stack:', componentStack || 'No stack trace available')
+
+  // 发送错误到监控服务
+  fetch('/api/error', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: error.message,
+      stack: error.stack,
+      componentStack: componentStack || undefined,
+      url: typeof window !== 'undefined' ? window.location.href : undefined,
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+    }),
+  }).catch(console.error)
 } 

@@ -34,6 +34,9 @@ const nextConfig = {
   },
   experimental: {
     optimizeCss: true,
+    optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react', 'react-icons'],
+    scrollRestoration: true,
+    legacyBrowsers: false
   },
   webpack: (config) => {
     config.resolve.alias = {
@@ -41,6 +44,29 @@ const nextConfig = {
       '@': require('path').resolve(__dirname, './src')
     };
     return config;
+  },
+  poweredByHeader: false,
+  reactStrictMode: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  optimizeFonts: true,
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload'
+          }
+        ]
+      }
+    ]
   }
 }
 

@@ -43,3 +43,11 @@ export interface Product {
   updatedAt: Date
 }
 
+export interface CookieData {
+  name: string
+  value: string
+  domain: string
+  expires: string
+  category: string
+}
+

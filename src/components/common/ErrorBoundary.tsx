@@ -1,30 +1,51 @@
 'use client'
 
-import { useEffect } from 'react'
+import { Component, ErrorInfo, ReactNode } from 'react'
+import { reportError } from '@/lib/monitoring'
 
-interface ErrorBoundaryProps {
-  error: Error
-  resetAction: () => void  // 重命名为 resetAction
+interface Props {
+  children: ReactNode
+  fallback?: ReactNode
 }
 
-export default function ErrorBoundary({
-  error,
-  resetAction,
-}: ErrorBoundaryProps) {
-  useEffect(() => {
-    console.error('Error:', error)
-  }, [error])
+interface State {
+  hasError: boolean
+  error?: Error
+}
 
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[400px] p-4">
-      <h2 className="text-2xl font-bold mb-4">Something went wrong!</h2>
-      <p className="text-gray-600 mb-6">{error.message}</p>
-      <button
-        onClick={resetAction}
-        className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
-      >
-        Try again
-      </button>
-    </div>
-  )
+export class ErrorBoundary extends Component<Props, State> {
+  public state: State = {
+    hasError: false
+  }
+
+  public static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error }
+  }
+
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    reportError(error, errorInfo.componentStack)
+  }
+
+  public render() {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        <div className="min-h-[400px] flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Something went wrong</h2>
+            <p className="text-gray-600 mb-4">
+              {this.state.error?.message || 'An unexpected error occurred'}
+            </p>
+            <button
+              onClick={() => this.setState({ hasError: false })}
+              className="text-primary hover:text-primary/80"
+            >
+              Try again
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
 } 

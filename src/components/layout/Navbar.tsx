@@ -14,7 +14,7 @@ const MENU_ITEMS = [
   { href: '/', label: 'Home' },
   { href: STORE_URL, label: 'Shop', external: true },
   { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' }
+  { href: '/contact', label: 'Contact' },
 ];
 
 export default function Navbar() {

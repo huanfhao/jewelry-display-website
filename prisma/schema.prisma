@@ -48,3 +48,15 @@ model Product {
 
   @@map("products")
 }
+
+model ErrorLog {
+  id             String   @id @default(cuid())
+  message        String
+  stack          String?
+  componentStack String?
+  url            String?
+  userAgent      String?
+  timestamp      DateTime @default(now())
+
+  @@map("error_logs")
+}

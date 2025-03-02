@@ -1,14 +1,11 @@
 'use client'
 
 import { useEffect, useState, Suspense } from 'react'
-import { ContactMessage } from '@/types'
+import { ContactMessage, CookieData } from '@/types'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Trash2, Search, Download, RefreshCw, Eye, EyeOff } from 'lucide-react'
-import { Pie } from '@visx/shape'
-import { Group } from '@visx/group'
-import { Text } from '@visx/text'
+import { Trash2, Search, Download, RefreshCw, Eye, EyeOff, Cookie } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -18,6 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useUserPreferences } from '@/hooks/useUserPreferences'
+import LoadingFallback from '@/components/common/LoadingFallback'
 
 // 将密码移到环境变量中
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'sy2024'
@@ -31,16 +30,57 @@ interface MessageStats {
   }
 }
 
-interface PieChartData {
-  name: string
-  value: number
+// Cookie 分类
+const COOKIE_CATEGORIES = {
+  essential: '必要',
+  preferences: '偏好',
+  analytics: '分析',
+  marketing: '营销'
 }
 
-interface PieChartProps {
-  data: Array<{
-    name: string;
-    value: number;
-  }>;
+// 获取 cookie 分类
+const getCookieCategory = (name: string): string => {
+  if (name.includes('user-preferences')) return COOKIE_CATEGORIES.preferences
+  if (name.includes('cookie-consent')) return COOKIE_CATEGORIES.essential
+  if (name.includes('ga') || name.includes('_ga')) return COOKIE_CATEGORIES.analytics
+  if (name.includes('fb') || name.includes('_fbp')) return COOKIE_CATEGORIES.marketing
+  return COOKIE_CATEGORIES.essential
+}
+
+// 用户行为分析
+interface UserAnalytics {
+  lastVisited: string[]
+  searchHistory: string[]
+  categoryPreferences: string[]
+  visitHistory: Array<{
+    date: Date
+    count: number
+  }>
+  deviceInfo: {
+    browser: string
+    os: string
+    device: string
+    screenSize: string
+    language: string
+    timezone: string
+  }
+  visitCount: number
+  lastActive: Date
+  engagementMetrics: {
+    avgTimeOnSite: number
+    bounceRate: number
+    returnRate: number
+  }
+}
+
+// 图表类型定义
+interface VisitData {
+  date: Date
+  count: number
+}
+
+interface VisitTrendChartProps {
+  data: VisitData[]
 }
 
 export default function MessagesPage() {
@@ -55,6 +95,30 @@ export default function MessagesPage() {
     read: 0,
     unread: 0,
     categories: {}
+  })
+  const [activeTab, setActiveTab] = useState<'messages' | 'cookies'>('messages')
+  const [cookieData, setCookieData] = useState<CookieData[]>([])
+  const { preferences } = useUserPreferences()
+  const [userAnalytics, setUserAnalytics] = useState<UserAnalytics>({
+    lastVisited: [],
+    searchHistory: [],
+    categoryPreferences: [],
+    visitHistory: [],
+    deviceInfo: {
+      browser: '',
+      os: '',
+      device: '',
+      screenSize: '',
+      language: '',
+      timezone: ''
+    },
+    visitCount: 0,
+    lastActive: new Date(),
+    engagementMetrics: {
+      avgTimeOnSite: 0,
+      bounceRate: 0,
+      returnRate: 0
+    }
   })
 
   // 过滤和搜索消息
@@ -175,61 +239,118 @@ export default function MessagesPage() {
     setStats(stats)
   }
 
-  const pieData: PieChartData[] = Object.entries(stats.categories).map(([name, value]) => ({
-    name,
-    value
-  }))
+  useEffect(() => {
+    if (isAuthenticated && activeTab === 'cookies') {
+      loadCookieData()
+      loadUserAnalytics()
+    }
+  }, [isAuthenticated, activeTab])
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']
+  const loadCookieData = () => {
+    const cookies = document.cookie.split(';')
+    const cookieList: CookieData[] = cookies.map(cookie => {
+      const [name, value] = cookie.split('=').map(part => part.trim())
+      const category = getCookieCategory(name)
+      return {
+        name,
+        value,
+        domain: window.location.hostname,
+        expires: 'Session',
+        category
+      }
+    })
 
-  // 添加饼图组件
-  const PieChartComponent: React.FC<PieChartProps> = ({ data }) => {
-    const width = 400
-    const height = 400
-    const radius = Math.min(width, height) / 2
-    const centerY = height / 2
-    const centerX = width / 2
+    if (preferences) {
+      cookieList.push({
+        name: 'User Preferences',
+        value: JSON.stringify(preferences, null, 2),
+        domain: window.location.hostname,
+        expires: '1 year',
+        category: COOKIE_CATEGORIES.preferences
+      })
+    }
 
+    setCookieData(cookieList)
+  }
+
+  const handleClearCookie = (name: string) => {
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`
+    loadCookieData()
+  }
+
+  const loadUserAnalytics = () => {
+    // 从用户偏好中获取数据
+    const { lastVisited = [], searchHistory = [], categoryPreferences = [] } = preferences || {}
+    
+    // 获取设备信息
+    const ua = navigator.userAgent
+    const browser = ua.includes('Chrome') ? 'Chrome' : 
+                   ua.includes('Firefox') ? 'Firefox' : 
+                   ua.includes('Safari') ? 'Safari' : 'Other'
+    const os = ua.includes('Windows') ? 'Windows' :
+               ua.includes('Mac') ? 'MacOS' :
+               ua.includes('Linux') ? 'Linux' : 'Other'
+    const device = ua.includes('Mobile') ? 'Mobile' : 'Desktop'
+    
+    // 获取更多设备信息
+    const screenSize = `${window.screen.width}x${window.screen.height}`
+    const language = navigator.language
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+
+    // 生成访问历史数据（示例）
+    const visitHistory = Array.from({ length: 7 }).map((_, i) => {
+      const date = new Date()
+      date.setDate(date.getDate() - i)
+      return {
+        date,
+        count: Math.floor(Math.random() * 10) + 1
+      }
+    }).reverse()
+
+    setUserAnalytics({
+      lastVisited,
+      searchHistory,
+      categoryPreferences,
+      visitHistory,
+      deviceInfo: { 
+        browser, 
+        os, 
+        device,
+        screenSize,
+        language,
+        timezone
+      },
+      visitCount: parseInt(localStorage.getItem('visitCount') || '0'),
+      lastActive: new Date(localStorage.getItem('lastActive') || Date.now()),
+      engagementMetrics: {
+        avgTimeOnSite: Math.round(Math.random() * 300), // 示例数据
+        bounceRate: Math.round(Math.random() * 100),
+        returnRate: Math.round(Math.random() * 100)
+      }
+    })
+  }
+
+  // 简单的访问趋势展示组件
+  const VisitTrendDisplay: React.FC<VisitTrendChartProps> = ({ data }) => {
     return (
-      <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`}>
-        <Group top={centerY} left={centerX}>
-          <Pie
-            data={data}
-            pieValue={d => d.value}
-            outerRadius={radius - 20}
-            innerRadius={0}
-            padAngle={0.01}
-          >
-            {pie => {
-              return pie.arcs.map((arc, index) => {
-                const [centroidX, centroidY] = pie.path.centroid(arc)
-                const hasSpaceForLabel = arc.endAngle - arc.startAngle >= 0.1
-                const arcPath = pie.path(arc)
-                const arcFill = COLORS[index % COLORS.length]
-
-                return (
-                  <g key={`arc-${index}`}>
-                    <path d={arcPath || ''} fill={arcFill} />
-                    {hasSpaceForLabel && (
-                      <text
-                        x={centroidX}
-                        y={centroidY}
-                        dy=".33em"
-                        fill="#ffffff"
-                        fontSize={14}
-                        textAnchor="middle"
-                        pointerEvents="none"
-                      >
-                        {arc.data.name}
-                      </text>
-                    )}
-                  </g>
-                )
-              })
-            }}
-          </Pie>
-        </Group>
-      </svg>
+      <div className="space-y-4">
+        {data.map((visit, index) => (
+          <div key={index} className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">
+              {visit.date.toLocaleDateString()}
+            </span>
+            <div className="flex-1 mx-4">
+              <div 
+                className="h-2 bg-blue-200 rounded"
+                style={{ 
+                  width: `${(visit.count / Math.max(...data.map(d => d.count))) * 100}%`
+                }}
+              />
+            </div>
+            <span className="text-sm font-medium">{visit.count} visits</span>
+          </div>
+        ))}
+      </div>
     )
   }
 
@@ -259,170 +380,348 @@ export default function MessagesPage() {
   }
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<LoadingFallback />}>
       <div className="container mx-auto px-4 py-12">
         <div className="flex flex-col space-y-4 mb-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Contact Messages</h1>
+            <h1 className="text-2xl font-bold">管理面板</h1>
             <Button 
               variant="outline"
               onClick={() => setIsAuthenticated(false)}
             >
-              Logout
+              退出登录
             </Button>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* 搜索栏 */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search messages..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-12"
-              />
-            </div>
-
-            {/* 过滤按钮组 */}
-            <div className="flex gap-2">
-              <Button
-                variant={filter === 'all' ? 'default' : 'outline'}
-                onClick={() => setFilter('all')}
-              >
-                All
-              </Button>
-              <Button
-                variant={filter === 'unread' ? 'default' : 'outline'}
-                onClick={() => setFilter('unread')}
-              >
-                <EyeOff className="w-4 h-4 mr-2" />
-                Unread
-              </Button>
-              <Button
-                variant={filter === 'read' ? 'default' : 'outline'}
-                onClick={() => setFilter('read')}
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                Read
-              </Button>
-            </div>
-
-            {/* 操作按钮 */}
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={exportMessages}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
-              <Button
-                variant="outline"
-                onClick={fetchMessages}
-                disabled={loading}
-              >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              </Button>
-            </div>
+          {/* 标签切换 */}
+          <div className="flex gap-4 border-b">
+            <button
+              className={`pb-2 px-4 ${activeTab === 'messages' ? 'border-b-2 border-primary' : ''}`}
+              onClick={() => setActiveTab('messages')}
+            >
+              <span className="flex items-center gap-2">
+                <Eye className="w-4 h-4" />
+                消息管理
+              </span>
+            </button>
+            <button
+              className={`pb-2 px-4 ${activeTab === 'cookies' ? 'border-b-2 border-primary' : ''}`}
+              onClick={() => setActiveTab('cookies')}
+            >
+              <span className="flex items-center gap-2">
+                <Cookie className="w-4 h-4" />
+                用户数据
+              </span>
+            </button>
           </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          {loading ? (
-            <div className="p-4 text-center">Loading...</div>
-          ) : filteredMessages.length === 0 ? (
-            <div className="p-4 text-center">No messages found</div>
-          ) : (
-            <div className="divide-y divide-gray-200">
-              {filteredMessages.map((message) => (
-                <div 
-                  key={message.id} 
-                  className={`p-4 ${message.read ? 'bg-gray-50' : 'bg-white'}`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-medium">{message.name}</h3>
-                      <p className="text-sm text-gray-600">{message.email}</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      {!message.read && message.id && (
-                        <button
-                          onClick={() => handleMarkAsRead(message.id!)}
-                          className="text-sm text-blue-600 hover:text-blue-800"
-                        >
-                          Mark as read
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleDelete(message.id!)}
-                        className="text-sm text-red-600 hover:text-red-800 flex items-center gap-1"
+
+          {activeTab === 'messages' ? (
+            <>
+              <div className="flex flex-col space-y-4 mb-6">
+                <div className="flex flex-col md:flex-row gap-4">
+                  {/* 搜索栏 */}
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      type="text"
+                      placeholder="搜索消息..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 h-12"
+                    />
+                  </div>
+
+                  {/* 过滤按钮组 */}
+                  <div className="flex gap-2">
+                    <Button
+                      variant={filter === 'all' ? 'default' : 'outline'}
+                      onClick={() => setFilter('all')}
+                    >
+                      全部
+                    </Button>
+                    <Button
+                      variant={filter === 'unread' ? 'default' : 'outline'}
+                      onClick={() => setFilter('unread')}
+                    >
+                      <EyeOff className="w-4 h-4 mr-2" />
+                      未读
+                    </Button>
+                    <Button
+                      variant={filter === 'read' ? 'default' : 'outline'}
+                      onClick={() => setFilter('read')}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      已读
+                    </Button>
+                  </div>
+
+                  {/* 操作按钮 */}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={exportMessages}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      导出
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={fetchMessages}
+                      disabled={loading}
+                    >
+                      <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow overflow-hidden">
+                {loading ? (
+                  <div className="p-4 text-center">加载中...</div>
+                ) : filteredMessages.length === 0 ? (
+                  <div className="p-4 text-center">暂无消息</div>
+                ) : (
+                  <div className="divide-y divide-gray-200">
+                    {filteredMessages.map((message) => (
+                      <div 
+                        key={message.id} 
+                        className={`p-4 ${message.read ? 'bg-gray-50' : 'bg-white'}`}
                       >
-                        <Trash2 className="w-4 h-4" />
-                        Delete
-                      </button>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="text-lg font-medium">{message.name}</h3>
+                            <p className="text-sm text-gray-600">{message.email}</p>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            {!message.read && message.id && (
+                              <button
+                                onClick={() => handleMarkAsRead(message.id!)}
+                                className="text-sm text-blue-600 hover:text-blue-800"
+                              >
+                                Mark as read
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDelete(message.id!)}
+                              className="text-sm text-red-600 hover:text-red-800 flex items-center gap-1"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                        <p className="mt-2 text-gray-700 whitespace-pre-wrap">{message.message}</p>
+                        <p className="mt-2 text-sm text-gray-500">
+                          {new Date(message.createdAt!).toLocaleString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold mb-4">Cookie 分类</h2>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {Object.entries(COOKIE_CATEGORIES).map(([key, label]) => (
+                    <div key={key} className="p-4 bg-white rounded-lg shadow">
+                      <h3 className="text-lg font-medium mb-2">{label}</h3>
+                      <p className="text-2xl font-bold">
+                        {cookieData.filter(cookie => cookie.category === label).length}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Table>
+                <TableCaption>所有 Cookie 和用户偏好设置列表</TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>名称</TableHead>
+                    <TableHead>值</TableHead>
+                    <TableHead>分类</TableHead>
+                    <TableHead>域名</TableHead>
+                    <TableHead>过期时间</TableHead>
+                    <TableHead className="text-right">操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {cookieData.map((cookie, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">{cookie.name}</TableCell>
+                      <TableCell>
+                        <div className="max-w-xs overflow-hidden text-ellipsis">
+                          {cookie.value}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          cookie.category === COOKIE_CATEGORIES.essential ? 'bg-blue-100 text-blue-800' :
+                          cookie.category === COOKIE_CATEGORIES.preferences ? 'bg-green-100 text-green-800' :
+                          cookie.category === COOKIE_CATEGORIES.analytics ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {cookie.category}
+                        </span>
+                      </TableCell>
+                      <TableCell>{cookie.domain}</TableCell>
+                      <TableCell>{cookie.expires}</TableCell>
+                      <TableCell className="text-right">
+                        {cookie.category !== COOKIE_CATEGORIES.essential && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleClearCookie(cookie.name)}
+                          >
+                            Clear
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-4">Cookie 统计</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-white rounded-lg shadow">
+                    <h3 className="text-lg font-medium mb-2">总大小</h3>
+                    <p className="text-2xl font-bold">
+                      {Math.round(JSON.stringify(cookieData).length / 1024)} KB
+                    </p>
+                  </div>
+                  <div className="p-4 bg-white rounded-lg shadow">
+                    <h3 className="text-lg font-medium mb-2">最后更新</h3>
+                    <p className="text-2xl font-bold">
+                      {new Date().toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-white rounded-lg shadow">
+                    <h3 className="text-lg font-medium mb-2">Cookie 政策</h3>
+                    <a 
+                      href="/privacy-policy" 
+                      className="text-primary hover:underline"
+                      target="_blank"
+                    >
+                      查看详情
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* 用户分析部分 */}
+              <div className="mt-12">
+                <h2 className="text-xl font-semibold mb-6">用户分析</h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* 访问趋势 */}
+                  <div className="bg-white rounded-lg shadow p-6 col-span-2">
+                    <h3 className="text-lg font-medium mb-4">访问趋势</h3>
+                    <div className="h-[300px]">
+                      <VisitTrendDisplay data={userAnalytics.visitHistory} />
                     </div>
                   </div>
-                  <p className="mt-2 text-gray-700 whitespace-pre-wrap">{message.message}</p>
-                  <p className="mt-2 text-sm text-gray-500">
-                    {new Date(message.createdAt!).toLocaleString()}
-                  </p>
+
+                  {/* 用户行为 */}
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="text-lg font-medium mb-4">用户行为</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-medium text-gray-600">最近访问页面</h4>
+                        <ul className="mt-2 space-y-1">
+                          {userAnalytics.lastVisited.map((page, index) => (
+                            <li key={index} className="text-sm text-gray-600">{page}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-600">搜索历史</h4>
+                        <ul className="mt-2 space-y-1">
+                          {userAnalytics.searchHistory.map((term, index) => (
+                            <li key={index} className="text-sm text-gray-600">{term}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-600">分类偏好</h4>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {userAnalytics.categoryPreferences.map((category, index) => (
+                            <span key={index} className="px-2 py-1 bg-gray-100 rounded-full text-xs">
+                              {category}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 设备信息 */}
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="text-lg font-medium mb-4">设备信息</h3>
+                    <div className="space-y-4">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">浏览器</span>
+                        <span className="font-medium">{userAnalytics.deviceInfo.browser}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">操作系统</span>
+                        <span className="font-medium">{userAnalytics.deviceInfo.os}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">设备类型</span>
+                        <span className="font-medium">{userAnalytics.deviceInfo.device}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">屏幕尺寸</span>
+                        <span className="font-medium">{userAnalytics.deviceInfo.screenSize}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">语言</span>
+                        <span className="font-medium">{userAnalytics.deviceInfo.language}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">时区</span>
+                        <span className="font-medium">{userAnalytics.deviceInfo.timezone}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">访问次数</span>
+                        <span className="font-medium">{userAnalytics.visitCount}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">最后活跃</span>
+                        <span className="font-medium">
+                          {userAnalytics.lastActive.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 参与度指标 */}
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="text-lg font-medium mb-4">参与度指标</h3>
+                    <div className="space-y-4">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">平均停留时间</span>
+                        <span className="font-medium">{userAnalytics.engagementMetrics.avgTimeOnSite}s</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">跳出率</span>
+                        <span className="font-medium">{userAnalytics.engagementMetrics.bounceRate}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">回访率</span>
+                        <span className="font-medium">{userAnalytics.engagementMetrics.returnRate}%</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            </>
           )}
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8 mt-8">
-          {/* 扇形图 */}
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Message Categories</h2>
-            <div className="w-full h-[300px]">
-              <PieChartComponent data={pieData} />
-            </div>
-          </div>
-
-          {/* 统计表格 */}
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <Table>
-              <TableCaption>Message Statistics Overview</TableCaption>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Category</TableHead>
-                  <TableHead className="text-right">Count</TableHead>
-                  <TableHead className="text-right">Percentage</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {Object.entries(stats.categories).map(([category, count]) => (
-                  <TableRow key={category}>
-                    <TableCell>{category}</TableCell>
-                    <TableCell className="text-right">{count}</TableCell>
-                    <TableCell className="text-right">
-                      {((count / stats.total) * 100).toFixed(1)}%
-                    </TableCell>
-                  </TableRow>
-                ))}
-                <TableRow className="font-medium">
-                  <TableCell>Total</TableCell>
-                  <TableCell className="text-right">{stats.total}</TableCell>
-                  <TableCell className="text-right">100%</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-
-            <div className="mt-6">
-              <div className="flex justify-between items-center mb-2">
-                <span>Read Messages:</span>
-                <span className="font-medium">{stats.read}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Unread Messages:</span>
-                <span className="font-medium text-red-500">{stats.unread}</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </Suspense>
