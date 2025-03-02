@@ -101,9 +101,105 @@
   }
 }
 
-/* 无障碍样式 */
+/* 高对比度主题 */
 .high-contrast {
-  filter: contrast(150%);
+  /* 使用更高对比度的颜色 */
+  --background: 0 0% 100%; /* 纯白背景 */
+  --foreground: 0 0% 0%; /* 纯黑文本 */
+  
+  /* 主要颜色使用更深的蓝色以提供更好的对比度 */
+  --primary: 210 100% 25%; /* 深蓝色 */
+  --primary-foreground: 0 0% 100%;
+  
+  /* 次要颜色使用更高对比度 */
+  --secondary: 0 0% 95%;
+  --secondary-foreground: 0 0% 0%;
+  
+  /* 其他颜色调整 */
+  --muted: 0 0% 85%;
+  --muted-foreground: 0 0% 15%;
+  
+  --accent: 210 100% 25%;
+  --accent-foreground: 0 0% 100%;
+  
+  --destructive: 0 100% 25%;
+  --destructive-foreground: 0 0% 100%;
+  
+  --border: 0 0% 0%;
+  --input: 0 0% 100%;
+  --ring: 210 100% 25%;
+}
+
+/* 高对比度模式下的文本增强 */
+.high-contrast {
+  /* 移除文本阴影，因为它可能降低对比度 */
+  * {
+    text-shadow: none !important;
+  }
+
+  /* 增加文本可见性 */
+  p, span, div {
+    color: black !important;
+    background-color: white !important;
+  }
+
+  /* 链接样式 */
+  a {
+    color: #00359E !important; /* 深蓝色链接 */
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+
+  a:hover, a:focus {
+    color: #001F5C !important; /* 更深的蓝色 */
+    text-decoration-thickness: 3px;
+  }
+
+  /* 按钮样式 */
+  button, 
+  [role="button"] {
+    border: 2px solid currentColor;
+    background-color: white !important;
+    color: black !important;
+  }
+
+  button:hover,
+  [role="button"]:hover {
+    background-color: #f0f0f0 !important;
+  }
+
+  /* 表单元素 */
+  input,
+  textarea,
+  select {
+    border: 2px solid black !important;
+    background-color: white !important;
+    color: black !important;
+  }
+
+  /* 标题样式 */
+  h1, h2, h3, h4, h5, h6 {
+    color: black !important;
+    border-bottom: 2px solid black;
+  }
+
+  /* 图标颜色 */
+  svg {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+  }
+
+  /* 确保焦点状态清晰可见 */
+  *:focus {
+    outline: 3px solid #00359E !important;
+    outline-offset: 2px !important;
+  }
+
+  /* 确保禁用状态清晰可见 */
+  *:disabled {
+    opacity: 0.5 !important;
+    background-color: #e0e0e0 !important;
+  }
 }
 
 /* 无障碍按钮动画 */
