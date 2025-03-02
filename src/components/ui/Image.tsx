@@ -12,14 +12,15 @@ export default function Image({
   wrapperClassName, 
   className,
   alt,
+  priority = false,
   ...props 
 }: ImageProps) {
   const [isLoading, setIsLoading] = useState(true)
 
   return (
     <div className={cn(
-      'overflow-hidden',
-      isLoading && 'animate-pulse bg-gray-200',
+      'overflow-hidden bg-gray-100',
+      isLoading && 'animate-pulse',
       wrapperClassName
     )}>
       <NextImage
@@ -29,6 +30,8 @@ export default function Image({
           className
         )}
         alt={alt}
+        priority={priority}
+        quality={75}
         onLoadingComplete={() => setIsLoading(false)}
         {...props}
       />

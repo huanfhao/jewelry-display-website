@@ -1,11 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['flylink-cdn-oss-prod.inflyway.com']
+    domains: ['flylink-cdn-oss-prod.inflyway.com'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    formats: ['image/webp'],
+    minimumCacheTTL: 60,
   },
   experimental: {
     optimizeCss: true,
-    scrollRestoration: true
+    scrollRestoration: true,
+    optimizePackageImports: [
+      '@vercel/analytics',
+      '@vercel/speed-insights',
+      'react-icons'
+    ],
+    webVitalsAttribution: ['CLS', 'LCP']
   },
   typescript: {
     ignoreBuildErrors: true
@@ -15,7 +25,6 @@ const nextConfig = {
   },
   output: 'standalone',
   productionBrowserSourceMaps: false,
-  compress: true,
   swcMinify: true,
   onDemandEntries: {
     maxInactiveAge: 60 * 60 * 1000,
@@ -34,18 +43,26 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   optimizeFonts: true,
+  staticPageGenerationTimeout: 120,
+  compress: true,
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: '/:all*(svg|jpg|png)',
+        locale: false,
         headers: [
           {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on'
-          },
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
+          }
+        ]
+      },
+      {
+        source: '/fonts/:path*',
+        headers: [
           {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload'
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
           }
         ]
       }
