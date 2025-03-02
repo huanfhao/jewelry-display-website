@@ -25,7 +25,22 @@ const jsonLd = {
   "name": "Professional Jewelry Display",
   "url": "https://syjewelrydisplay.cn",
   "logo": "https://syjewelrydisplay.cn/logo.png",
-  "description": "Professional jewelry display manufacturer offering custom design and wholesale services."
+  "description": "Leading manufacturer of high-quality jewelry displays and store fixtures",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "CN"
+  },
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+86-xxx-xxxx-xxxx",
+    "contactType": "sales",
+    "availableLanguage": ["English", "Chinese"]
+  },
+  "sameAs": [
+    "https://www.facebook.com/your-page",
+    "https://www.instagram.com/your-page",
+    "https://www.linkedin.com/company/your-page"
+  ]
 }
 
 export const metadata: Metadata = {
@@ -34,7 +49,8 @@ export const metadata: Metadata = {
     template: '%s | Professional Jewelry Display',
     default: 'Professional Jewelry Display - Custom Jewelry Display Solutions'
   },
-  description: 'Professional jewelry display manufacturer offering custom design and wholesale services.',
+  description: 'Leading manufacturer of high-quality jewelry displays, showcases, and retail store fixtures. Custom design solutions for jewelry stores worldwide.',
+  keywords: 'jewelry display, jewelry showcase, jewelry store fixtures, retail display, custom jewelry display, jewelry store design',
   icons: {
     icon: [
       { url: '/favicon.ico' },
@@ -50,11 +66,43 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Professional Jewelry Display - Custom Jewelry Display Solutions',
-    description: 'Professional jewelry display manufacturer offering custom design and wholesale services.',
+    description: 'Leading manufacturer of high-quality jewelry displays, showcases, and retail store fixtures. Custom design solutions for jewelry stores worldwide.',
     url: 'https://syjewelrydisplay.cn',
     siteName: 'Professional Jewelry Display',
     locale: 'en_US',
     type: 'website',
+    images: [
+      {
+        url: '/images/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Professional Jewelry Display Solutions'
+      }
+    ]
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Professional Jewelry Display - Custom Solutions',
+    description: 'Leading manufacturer of jewelry displays and store fixtures',
+    images: ['/images/og-image.jpg']
+  },
+  alternates: {
+    canonical: 'https://syjewelrydisplay.cn',
+    languages: {
+      'en-US': 'https://syjewelrydisplay.cn/en',
+      'zh-CN': 'https://syjewelrydisplay.cn/zh'
+    }
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    }
   }
 }
 
