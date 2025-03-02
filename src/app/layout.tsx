@@ -5,13 +5,8 @@ import 'nprogress/nprogress.css'
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 
-const LoadingFallback = dynamic(() => import('@/components/common/LoadingFallback'), {
-  ssr: true
-})
-
-const RootClientLayout = dynamic(() => import('./root-client-layout'), {
-  ssr: false
-})
+const LoadingFallback = dynamic(() => import('@/components/common/LoadingFallback'))
+const RootClientLayout = dynamic(() => import('./root-client-layout'))
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -33,7 +28,7 @@ export const metadata: Metadata = {
   title: {
     template: '%s | SY Jewelry Display',
     default: 'SY Jewelry Display - Professional Jewelry Display Manufacturer'
-  } as const,
+  },
   description: 'Professional jewelry display manufacturer offering custom design and wholesale services.',
   openGraph: {
     title: 'SY Jewelry Display - Professional Jewelry Display Manufacturer',
