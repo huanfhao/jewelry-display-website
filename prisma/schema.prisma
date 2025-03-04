@@ -1,19 +1,14 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  directUrl    = env("DIRECT_URL")
   relationMode = "prisma"
 }
 
-// 联系消息表
 model ContactMessage {
   id        String   @id @default(cuid())
   name      String
@@ -59,4 +54,84 @@ model ErrorLog {
   timestamp      DateTime @default(now())
 
   @@map("error_logs")
+}
+
+model BlogPost {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  content     String
+  excerpt     String?
+  coverImage  String?
+  published   Boolean    @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  categories  Category[]
+  tags        Tag[]
+  comments    Comment[]
+
+  @@map("blog_posts")
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  slug      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  posts     BlogPost[]
+
+  @@map("categories")
+}
+
+model Tag {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  slug      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  posts     BlogPost[]
+
+  @@map("tags")
+}
+
+model BlogPostToCategory {
+  A String
+  B String
+
+  @@id([A, B], map: "_BlogPostToCategory_AB_pkey")
+  @@index([B], map: "_BlogPostToCategory_B_index")
+  @@map("_BlogPostToCategory")
+}
+
+model BlogPostToTag {
+  A String
+  B String
+
+  @@id([A, B], map: "_BlogPostToTag_AB_pkey")
+  @@index([B], map: "_BlogPostToTag_B_index")
+  @@map("_BlogPostToTag")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  author    String
+  email     String
+  postId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+  @@index([postId])
+}
+
+model users {
+  id        String   @id
+  name      String?
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime
 }

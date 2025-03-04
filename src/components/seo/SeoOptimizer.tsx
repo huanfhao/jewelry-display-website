@@ -7,7 +7,7 @@ export default function SeoOptimizer() {
   const pathname = usePathname()
 
   useEffect(() => {
-    // 添加结构化数据
+    // 添加面包屑导航结构化数据
     const script = document.createElement('script')
     script.type = 'application/ld+json'
     script.text = JSON.stringify({

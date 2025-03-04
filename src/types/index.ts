@@ -32,15 +32,12 @@ export interface PerformanceMetric {
 
 export interface Product {
   id: string
-  name: string
+  title: string
   description: string
   image: string
-  price?: string
-  sku?: string
+  price: number
   slug: string
   category?: string
-  createdAt: Date
-  updatedAt: Date
 }
 
 export interface CookieData {

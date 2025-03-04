@@ -12,8 +12,7 @@ export default function PerformanceOptimizer() {
       const links = [
         { rel: 'preload', href: '/fonts/inter.woff2', as: 'font', type: 'font/woff2' },
         { rel: 'preload', href: '/images/hero.jpg', as: 'image' },
-        { rel: 'dns-prefetch', href: 'https://res.cloudinary.com' },
-        { rel: 'dns-prefetch', href: 'https://www.googletagmanager.com' },
+        { rel: 'dns-prefetch', href: 'https://flylink-cdn-oss-prod.inflyway.com' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' }
       ]
@@ -34,7 +33,7 @@ export default function PerformanceOptimizer() {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const target = entry.target as HTMLImageElement | HTMLIFrameElement
+            const target = entry.target as HTMLImageElement
             if (target.dataset.src) {
               target.src = target.dataset.src
               observer.unobserve(target)

@@ -13,3 +13,12 @@ export function formatPrice(price: number | string | null) {
     currency: 'USD',
   }).format(numericPrice);
 }
+
+export function formatDate(date: Date | string | null) {
+  if (!date) return ''
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}

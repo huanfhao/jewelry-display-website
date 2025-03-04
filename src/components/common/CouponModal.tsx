@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { createPortal } from 'react-dom'
 import { useEffect } from 'react'
+import { X } from 'lucide-react'
 
 interface CouponModalProps {
   onClose: () => void
@@ -33,7 +34,7 @@ export default function CouponModal({ onClose, onRedirect }: CouponModalProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -54,13 +55,14 @@ export default function CouponModal({ onClose, onRedirect }: CouponModalProps) {
         tabIndex={-1}
       >
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.1, rotate: 90 }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl font-bold p-2 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-full"
+          className="absolute -top-3 -right-3 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
           aria-label="Close modal"
         >
-          ×
+          <X className="w-5 h-5" />
         </motion.button>
         
         <div className="text-center">
@@ -77,7 +79,7 @@ export default function CouponModal({ onClose, onRedirect }: CouponModalProps) {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="border-dashed border-2 border-red-500 p-4 mb-4 rounded-lg"
+            className="border-dashed border-2 border-red-500 p-4 mb-4 rounded-lg bg-red-50"
           >
             <motion.p 
               initial={{ y: -10, opacity: 0 }}

@@ -1,35 +1,72 @@
-'use client'
+import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+import ProductSchema from '@/components/products/ProductSchema'
+import { prisma } from '@/lib/prisma'
 
-import { useEffect } from 'react'
-import { useUserPreferences } from '@/hooks/useUserPreferences'
+interface Props {
+  params: { slug: string }
+}
 
-export default function ProductPage({ params }: { params: { slug: string } }) {
-  const { trackProductView, preferences } = useUserPreferences()
+async function getProduct(slug: string) {
+  try {
+    const product = await prisma.product.findUnique({
+      where: { slug }
+    })
+    
+    if (!product) return null
 
-  useEffect(() => {
-    // 记录产品访问
-    trackProductView(params.slug)
-  }, [params.slug])
+    return {
+      name: product.title,
+      description: product.description,
+      image: product.image,
+      price: product.price?.toString() || undefined,
+      category: product.category
+    }
+  } catch (error) {
+    console.error('Error fetching product:', error)
+    return null
+  }
+}
 
-  // 使用用户偏好来个性化页面
-  const recentlyViewed = preferences.viewedProducts || []
-  const userTheme = preferences.theme || 'light'
-  
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const product = await getProduct(params.slug)
+  if (!product) return {}
+
+  return {
+    title: product.name,
+    description: product.description,
+    openGraph: {
+      title: product.name,
+      description: product.description,
+      images: [{ url: product.image }]
+    }
+  }
+}
+
+export default async function ProductPage({ params }: Props) {
+  const product = await getProduct(params.slug)
+  if (!product) notFound()
+
   return (
-    <div>
-      {/* 产品详情 */}
-      
-      {/* 最近浏览 */}
-      {recentlyViewed.length > 0 && (
-        <div>
-          <h3>Recently Viewed</h3>
-          <ul>
-            {recentlyViewed.map(productId => (
-              <li key={productId}>{productId}</li>
-            ))}
-          </ul>
+    <>
+      <ProductSchema product={product} />
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
+          <img 
+            src={product.image} 
+            alt={product.name}
+            className="w-full rounded-lg mb-6"
+          />
+          <p className="text-gray-600 mb-4">{product.description}</p>
+          {product.price && (
+            <p className="text-xl font-semibold mb-4">Price: {product.price}</p>
+          )}
+          {product.category && (
+            <p className="text-sm text-gray-500">Category: {product.category}</p>
+          )}
         </div>
-      )}
-    </div>
+      </div>
+    </>
   )
 } 

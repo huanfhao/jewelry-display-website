@@ -22,19 +22,22 @@ const RootClientLayout = dynamic(() => import('./root-client-layout'), {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "Professional Jewelry Display",
+  "name": "SY Jewelry Display",
   "url": "https://syjewelrydisplay.cn",
   "logo": "https://syjewelrydisplay.cn/logo.png",
   "description": "Leading manufacturer of high-quality jewelry displays and store fixtures",
   "address": {
     "@type": "PostalAddress",
+    "addressLocality": "Guangzhou",
+    "addressRegion": "Guangdong",
     "addressCountry": "CN"
   },
   "contactPoint": {
     "@type": "ContactPoint",
-    "telephone": "+86-xxx-xxxx-xxxx",
+    "telephone": "+86-153-9578-7004",
     "contactType": "sales",
-    "availableLanguage": ["English", "Chinese"]
+    "email": "SYJewelryDisplay@outlook.com",
+    "availableLanguage": ["en", "zh"]
   },
   "sameAs": [
     "https://www.facebook.com/your-page",
@@ -46,11 +49,18 @@ const jsonLd = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://syjewelrydisplay.cn'),
   title: {
-    template: '%s | Professional Jewelry Display',
-    default: 'Professional Jewelry Display - Custom Jewelry Display Solutions'
+    template: '%s | SY Jewelry Display',
+    default: 'SY Jewelry Display - Professional Jewelry Display Manufacturer'
   },
   description: 'Leading manufacturer of high-quality jewelry displays, showcases, and retail store fixtures. Custom design solutions for jewelry stores worldwide.',
-  keywords: 'jewelry display, jewelry showcase, jewelry store fixtures, retail display, custom jewelry display, jewelry store design',
+  keywords: [
+    'jewelry display manufacturer',
+    'jewelry showcase design',
+    'retail store fixtures',
+    'custom jewelry displays',
+    'jewelry store equipment',
+    'display solutions'
+  ].join(', '),
   icons: {
     icon: [
       { url: '/favicon.ico' },
@@ -65,20 +75,17 @@ export const metadata: Metadata = {
     ]
   },
   openGraph: {
-    title: 'Professional Jewelry Display - Custom Jewelry Display Solutions',
-    description: 'Leading manufacturer of high-quality jewelry displays, showcases, and retail store fixtures. Custom design solutions for jewelry stores worldwide.',
-    url: 'https://syjewelrydisplay.cn',
-    siteName: 'Professional Jewelry Display',
-    locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: '/images/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Professional Jewelry Display Solutions'
-      }
-    ]
+    siteName: 'SY Jewelry Display',
+    title: 'Professional Jewelry Display Solutions',
+    description: 'Custom jewelry display manufacturer offering premium quality display stands and retail solutions.',
+    url: 'https://syjewelrydisplay.cn',
+    images: [{
+      url: '/images/og-image.jpg',
+      width: 1200,
+      height: 630,
+      alt: 'SY Jewelry Display - Professional Display Solutions'
+    }]
   },
   twitter: {
     card: 'summary_large_image',
@@ -103,6 +110,9 @@ export const metadata: Metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     }
+  },
+  verification: {
+    google: 'your-google-verification-code'
   }
 }
 

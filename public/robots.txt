@@ -2,6 +2,10 @@
 User-agent: *
 Allow: /
 
+# 禁止访问管理页面
+Disallow: /admin/
+Disallow: /api/
+
 # Host
 Host: https://syjewelrydisplay.cn
 

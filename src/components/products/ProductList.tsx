@@ -1,46 +1,47 @@
 'use client'
 
-import { useState } from 'react'
-import ProductGrid from './ProductGrid'
+import Link from 'next/link'
+import Image from 'next/image'
+import { Product } from '@/types'
 
 const STORE_URL = 'https://store.flylinking.com/s/2UPEH35FWO'
 
-const products = [
-  {
-    title: 'Acrylic Ring Display',
-    image: 'https://flylink-cdn-oss-prod.inflyway.com/flylink/1740642402764_f0ae2f70ff77720b457a4e8e54858901.webp',
-    description: 'Clear acrylic ring display stand, perfect for jewelry store showcase.',
-    slug: 'acrylic-ring-display'
-  },
-  {
-    title: 'Jewelry Display Stand',
-    image: 'https://flylink-cdn-oss-prod.inflyway.com/flylink/1734597652416_1ad066513b2f086707069692b389307d.webp',
-    description: 'Professional jewelry display stand with multiple layers.',
-    slug: 'jewelry-display-stand'
-  },
-  {
-    title: 'Necklace Display',
-    image: 'https://flylink-cdn-oss-prod.inflyway.com/flylink/1734921287054_23193664127817d7fc2a2c7df6f17760.webp',
-    description: 'Elegant necklace display stand for retail and home use.',
-    slug: 'necklace-display'
-  },
-  {
-    title: 'Watch Display',
-    image: 'https://flylink-cdn-oss-prod.inflyway.com/flylink/1734937589496_8bf6ebae8c0b343cfe34484bb9e27563.webp',
-    description: 'Premium watch display stand with modern design.',
-    slug: 'watch-display'
-  }
-]
+interface ProductListProps {
+  products: Product[]
+}
 
-export default function ProductList() {
+export default function ProductList({ products }: ProductListProps) {
   const handleRedirect = () => {
     window.location.href = STORE_URL
   }
 
   return (
-    <div className="container mx-auto px-4 py-16">
-      <h1 className="text-4xl font-playfair text-center mb-12">Our Products</h1>
-      <ProductGrid products={products} onProductClick={handleRedirect} />
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Our Products</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {products.map(product => (
+          <div key={product.id} className="border rounded-lg overflow-hidden">
+            <img 
+              src={product.image} 
+              alt={product.title}
+              className="w-full h-64 object-cover"
+            />
+            <div className="p-4">
+              <h2 className="text-xl font-semibold mb-2">{product.title}</h2>
+              <p className="text-gray-600 mb-4">{product.description}</p>
+              <div className="flex justify-between items-center">
+                <span className="text-lg font-bold">${product.price}</span>
+                <Link 
+                  href={`/products/${product.slug}`}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                >
+                  View Details
+                </Link>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 } 

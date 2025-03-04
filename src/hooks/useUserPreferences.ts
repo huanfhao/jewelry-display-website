@@ -1,53 +1,48 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { userPreferences } from '@/lib/userPreferences'
-import { UserPreferences } from '@/types/user'
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
-export function useUserPreferences() {
-  const [preferences, setPreferences] = useState<UserPreferences>({})
-
-  useEffect(() => {
-    if (userPreferences) {
-      setPreferences(userPreferences.getPreferences())
-    }
-  }, [])
-
-  const updatePreferences = () => {
-    if (userPreferences) {
-      setPreferences(userPreferences.getPreferences())
-    }
+interface UserPreferences {
+  theme: 'light' | 'dark'
+  language: string
+  cookieConsent: {
+    essential: boolean
+    preferences: boolean
+    analytics: boolean
+    marketing: boolean
   }
+  [key: string]: any
+}
 
-  return {
-    preferences,
-    trackPageVisit: (path: string) => {
-      userPreferences?.trackPageVisit(path)
-      updatePreferences()
-    },
-    trackProductView: (productId: string) => {
-      userPreferences?.trackProductView(productId)
-      updatePreferences()
-    },
-    trackSearch: (searchTerm: string) => {
-      userPreferences?.trackSearch(searchTerm)
-      updatePreferences()
-    },
-    updateCategoryPreference: (category: string) => {
-      userPreferences?.updateCategoryPreference(category)
-      updatePreferences()
-    },
-    setTheme: (theme: 'light' | 'dark') => {
-      userPreferences?.setTheme(theme)
-      updatePreferences()
-    },
-    setLanguage: (language: string) => {
-      userPreferences?.setLanguage(language)
-      updatePreferences()
-    },
-    clearPreferences: () => {
-      userPreferences?.clearPreferences()
-      updatePreferences()
+interface UserPreferencesStore {
+  preferences: UserPreferences
+  updatePreferences: (newPreferences: Partial<UserPreferences>) => void
+}
+
+export const useUserPreferences = create<UserPreferencesStore>()(
+  persist(
+    (set) => ({
+      preferences: {
+        theme: 'light',
+        language: 'en',
+        cookieConsent: {
+          essential: true,
+          preferences: false,
+          analytics: false,
+          marketing: false
+        }
+      },
+      updatePreferences: (newPreferences) =>
+        set((state) => ({
+          preferences: {
+            ...state.preferences,
+            ...newPreferences
+          }
+        }))
+    }),
+    {
+      name: 'user-preferences'
     }
-  }
-} 
+  )
+) 
