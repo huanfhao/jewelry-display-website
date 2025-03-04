@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import { formatDate } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 export default async function CommentsPage() {
   const comments = await prisma.$queryRaw<Array<{
     id: string;

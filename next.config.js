@@ -17,7 +17,9 @@ const nextConfig = {
       '@visx/shape',
       '@visx/group'
     ],
-    webVitalsAttribution: ['CLS', 'LCP']
+    webVitalsAttribution: ['CLS', 'LCP'],
+    skipTrailingSlashRedirect: true,
+    missingSuspenseWithCSRError: false,
   },
   typescript: {
     ignoreBuildErrors: true

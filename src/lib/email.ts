@@ -1,7 +1,31 @@
 import { Resend } from 'resend'
 import nodemailer from 'nodemailer'
-import { Order, OrderItem, User } from '@prisma/client'
+import { prisma } from './prisma'
 import { formatPrice } from './utils'
+
+// 定义所需的类型
+interface Order {
+  id: string
+  shippingName: string
+  shippingPhone: string
+  shippingAddress: string
+  note?: string
+  total: number
+}
+
+interface OrderItem {
+  quantity: number
+  price: number
+  product: {
+    name: string
+    price: number
+  }
+}
+
+interface User {
+  name: string | null
+  email: string
+}
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -122,4 +146,35 @@ export async function sendOrderEmail({ order, user, items }: SendOrderEmailParam
     subject: `新订单通知 - ${order.id}`,
     html,
   })
+}
+
+export async function sendContactEmail(data: {
+  name: string
+  email: string
+  message: string
+}) {
+  try {
+    await resend.emails.send({
+      from: 'SY Jewelry Display <contact@syjewelrydisplay.com>',
+      to: process.env.ADMIN_EMAIL!,
+      subject: `New Contact Form Submission from ${data.name}`,
+      text: `
+Name: ${data.name}
+Email: ${data.email}
+Message: ${data.message}
+      `
+    })
+
+    // 保存到数据库
+    await prisma.contactMessage.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        message: data.message
+      }
+    })
+  } catch (error) {
+    console.error('Error sending email:', error)
+    throw error
+  }
 } 

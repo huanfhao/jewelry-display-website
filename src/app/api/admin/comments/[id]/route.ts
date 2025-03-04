@@ -12,7 +12,7 @@ export async function DELETE(
       where: { id }
     })
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ message: 'Comment deleted successfully' })
   } catch (error) {
     console.error('Error deleting comment:', error)
     return NextResponse.json(

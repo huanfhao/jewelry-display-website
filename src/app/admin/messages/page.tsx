@@ -20,6 +20,8 @@ interface Comment {
   post_title: string
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function MessagesPage() {
   // 获取联系表单消息
   const contactMessages = await prisma.contactMessage.findMany({
