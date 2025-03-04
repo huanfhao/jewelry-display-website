@@ -1,42 +1,37 @@
-import { create } from 'zustand';
+import * as React from "react"
+import { ToastActionElement, type ToastProps } from "@/components/ui/toast"
 
-interface Toast {
-  id: string;
-  title: string;
-  description?: string;
-  variant?: 'default' | 'destructive';
+const TOAST_LIMIT = 1
+const TOAST_REMOVE_DELAY = 1000
+
+export type ToasterToast = ToastProps & {
+  id: string
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: ToastActionElement
 }
 
-interface ToastStore {
-  toasts: Toast[];
-  addToast: (toast: Omit<Toast, 'id'>) => void;
-  removeToast: (id: string) => void;
+interface State {
+  toasts: ToasterToast[]
 }
-
-export const useToastStore = create<ToastStore>((set) => ({
-  toasts: [],
-  addToast: (toast) =>
-    set((state) => ({
-      toasts: [
-        ...state.toasts,
-        { ...toast, id: Math.random().toString(36).slice(2) },
-      ],
-    })),
-  removeToast: (id) =>
-    set((state) => ({
-      toasts: state.toasts.filter((toast) => toast.id !== id),
-    })),
-}));
 
 export function useToast() {
-  const { addToast, removeToast } = useToastStore();
+  const [state, setState] = React.useState<State>({
+    toasts: [],
+  })
 
   return {
-    toast: (props: Omit<Toast, 'id'>) => {
-      addToast(props);
-      setTimeout(() => {
-        removeToast(props.title);
-      }, 5000);
+    toasts: state.toasts,
+    toast: (props: Omit<ToasterToast, "id">) => {
+      const id = Math.random().toString(36).substr(2, 9)
+      setState((state) => ({
+        toasts: [...state.toasts, { ...props, id }],
+      }))
     },
-  };
+    dismiss: (toastId?: string) => {
+      setState((state) => ({
+        toasts: state.toasts.filter((toast) => toast.id !== toastId),
+      }))
+    },
+  }
 } 

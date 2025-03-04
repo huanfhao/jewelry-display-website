@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'); */
 
 @tailwind base;
 @tailwind components;
@@ -35,6 +35,8 @@
     --ring: 212 100% 50%;
  
     --radius: 0.5rem;
+
+    --font-scale: 1;
   }
  
   .dark {
@@ -74,6 +76,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-size: calc(1rem * var(--font-scale));
   }
 }
 
@@ -96,4 +99,183 @@
   100% {
     background-position: 0% 50%;
   }
+}
+
+/* 高对比度主题 */
+.high-contrast {
+  /* 使用更高对比度的颜色 */
+  --background: 0 0% 100%; /* 纯白背景 */
+  --foreground: 0 0% 0%; /* 纯黑文本 */
+  
+  /* 主要颜色使用更深的蓝色以提供更好的对比度 */
+  --primary: 210 100% 25%; /* 深蓝色 */
+  --primary-foreground: 0 0% 100%;
+  
+  /* 次要颜色使用更高对比度 */
+  --secondary: 0 0% 95%;
+  --secondary-foreground: 0 0% 0%;
+  
+  /* 其他颜色调整 */
+  --muted: 0 0% 85%;
+  --muted-foreground: 0 0% 15%;
+  
+  --accent: 210 100% 25%;
+  --accent-foreground: 0 0% 100%;
+  
+  --destructive: 0 100% 25%;
+  --destructive-foreground: 0 0% 100%;
+  
+  --border: 0 0% 0%;
+  --input: 0 0% 100%;
+  --ring: 210 100% 25%;
+}
+
+/* 高对比度模式下的文本增强 */
+.high-contrast {
+  /* 移除文本阴影，因为它可能降低对比度 */
+  * {
+    text-shadow: none !important;
+  }
+
+  /* 增加文本可见性 */
+  p, span, div {
+    color: black !important;
+    background-color: white !important;
+  }
+
+  /* 链接样式 */
+  a {
+    color: #00359E !important; /* 深蓝色链接 */
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+
+  a:hover, a:focus {
+    color: #001F5C !important; /* 更深的蓝色 */
+    text-decoration-thickness: 3px;
+  }
+
+  /* 按钮样式 */
+  button, 
+  [role="button"] {
+    border: 2px solid currentColor;
+    background-color: white !important;
+    color: black !important;
+  }
+
+  button:hover,
+  [role="button"]:hover {
+    background-color: #f0f0f0 !important;
+  }
+
+  /* 表单元素 */
+  input,
+  textarea,
+  select {
+    border: 2px solid black !important;
+    background-color: white !important;
+    color: black !important;
+  }
+
+  /* 标题样式 */
+  h1, h2, h3, h4, h5, h6 {
+    color: black !important;
+    border-bottom: 2px solid black;
+  }
+
+  /* 图标颜色 */
+  svg {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+  }
+
+  /* 确保焦点状态清晰可见 */
+  *:focus {
+    outline: 3px solid #00359E !important;
+    outline-offset: 2px !important;
+  }
+
+  /* 确保禁用状态清晰可见 */
+  *:disabled {
+    opacity: 0.5 !important;
+    background-color: #e0e0e0 !important;
+  }
+}
+
+/* 无障碍按钮动画 */
+.accessibility-widget {
+  transition: all 0.3s ease;
+}
+
+/* 移动端安全区域适配 */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+.safe-area-x {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* 优化移动端触摸体验 */
+@media (max-width: 768px) {
+  .accessibility-widget button {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  /* 增加移动端按钮点击区域 */
+  .accessibility-widget button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* 优化移动端滚动 */
+  .accessibility-widget .modal-content {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
+
+/* NProgress 自定义样式 */
+#nprogress {
+  pointer-events: none;
+  z-index: 9999;
+}
+
+#nprogress .bar {
+  background: hsl(var(--primary));
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+}
+
+/* 进度条动画效果 */
+#nprogress .peg {
+  display: block;
+  position: absolute;
+  right: 0px;
+  width: 100px;
+  height: 100%;
+  box-shadow: 0 0 10px hsl(var(--primary)), 0 0 5px hsl(var(--primary));
+  opacity: 1.0;
+  transform: rotate(3deg) translate(0px, -4px);
+}
+
+/* 渐变动画 */
+@keyframes nprogress-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+#nprogress .bar {
+  animation: nprogress-pulse 1s ease-in-out infinite;
 }

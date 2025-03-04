@@ -1,86 +1,57 @@
-'use client';
+import { prisma } from '@/lib/prisma'
+import AdminMessagesClient from './page.client'
 
-import { useEffect, useState } from 'react';
-import { format } from 'date-fns';
+export const dynamic = 'force-dynamic'
 
-interface Message {
-  id: string;
-  name: string;
-  email: string;
-  message: string;
-  createdAt: string;
-  read: boolean;
-}
+export default async function AdminMessagesPage() {
+  try {
+    const [messages, metrics, comments] = await Promise.all([
+      prisma.contactMessage.findMany({
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.performanceMetric.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 100
+      }),
+      prisma.comment.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: {
+          post: {
+            select: {
+              title: true
+            }
+          }
+        }
+      })
+    ])
 
-export default function AdminMessagesPage() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchMessages();
-  }, []);
-
-  const fetchMessages = async () => {
-    try {
-      const res = await fetch('/api/admin/messages');
-      const data = await res.json();
-      setMessages(data);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    } finally {
-      setLoading(false);
+    // 序列化日期
+    const serializedData = {
+      messages: messages.map(msg => ({
+        ...msg,
+        createdAt: msg.createdAt.toISOString(),
+        updatedAt: msg.updatedAt.toISOString()
+      })),
+      comments: comments.map(comment => ({
+        ...comment,
+        createdAt: comment.createdAt.toISOString(),
+        updatedAt: comment.updatedAt.toISOString()
+      })),
+      metrics: metrics.map(metric => ({
+        ...metric,
+        createdAt: metric.createdAt.toISOString()
+      }))
     }
-  };
 
-  const markAsRead = async (id: string) => {
-    try {
-      await fetch(`/api/admin/messages/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ read: true }),
-      });
-      fetchMessages();
-    } catch (error) {
-      console.error('Error marking message as read:', error);
-    }
-  };
-
-  if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <AdminMessagesClient 
+        initialMessages={serializedData.messages}
+        initialComments={serializedData.comments}
+        initialMetrics={serializedData.metrics}
+      />
+    )
+  } catch (error) {
+    console.error('Error loading admin messages:', error)
+    return <div>Error loading data. Please try again later.</div>
   }
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Contact Messages</h1>
-      <div className="grid gap-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`p-4 rounded-lg border ${
-              message.read ? 'bg-gray-50' : 'bg-white'
-            }`}
-          >
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <h3 className="font-medium">{message.name}</h3>
-                <p className="text-sm text-gray-600">{message.email}</p>
-              </div>
-              <div className="text-sm text-gray-500">
-                {format(new Date(message.createdAt), 'PPp')}
-              </div>
-            </div>
-            <p className="text-gray-700 mb-4">{message.message}</p>
-            {!message.read && (
-              <button
-                onClick={() => markAsRead(message.id)}
-                className="text-sm text-blue-600 hover:text-blue-800"
-              >
-                Mark as read
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 } 

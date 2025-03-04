@@ -2,74 +2,57 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { Button } from '@/components/ui/button'
-import { useState } from 'react'
-import heroImage from '../../../public/images/about.jpg'
 
-const STORE_URL = 'https://store.flylinking.com/s/2UPEH35FWO';
+const STORE_URL = 'https://store.flylinking.com/s/2UPEH35FWO'
 
 export default function Hero() {
-  const [imgError, setImgError] = useState(false)
-
-  const handleViewProducts = () => {
-    window.open(STORE_URL, '_blank');
-  };
+  const handleRedirect = () => {
+    window.location.href = STORE_URL
+  }
 
   return (
-    <div className="relative h-[90vh] md:h-[80vh] overflow-hidden">
-      {/* Background Image */}
-      {imgError ? (
-        // 显示备用背景色或图片
-        <div className="absolute inset-0 bg-gray-900" />
-      ) : (
-        <Image
-          src={heroImage}
-          alt="SY Jewelry Display"
-          fill
-          className="object-cover object-center"
-          priority
-          sizes="100vw"
-          quality={90}
-          onError={(e) => {
-            console.error('Image load error:', e);
-            console.log('Attempted image path:', '/images/about.jpg');
-            setImgError(true);
-          }}
-          onLoad={() => {
-            console.log('Image loaded successfully');
-          }}
-        />
-      )}
-      
-      {/* Content */}
-      <div className="absolute inset-0 bg-black/30">
-        <div className="container mx-auto h-full px-4 flex items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="w-full md:max-w-2xl text-white text-center md:text-left"
-          >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-playfair mb-4 md:mb-6">
-              Professional
-              <br className="md:hidden" />
-              Display Props
-            </h1>
-            <p className="text-base md:text-lg lg:text-xl mb-6 md:mb-8 text-gray-100">
-              Enhance your jewelry presentation with our
-              <br className="hidden md:block" />
-              premium display props and accessories
-            </p>
-            <Button
-              size="lg"
-              onClick={handleViewProducts}
-              className="w-full md:w-auto bg-white text-black hover:bg-gray-100"
+    <section className="relative h-[80vh] min-h-[600px]">
+      <Image
+        src="/images/hero.jpg"
+        alt="Jewelry Display Solutions"
+        fill
+        priority={true}
+        className="object-cover"
+        sizes="100vw"
+      />
+      <div className="absolute inset-0 bg-black bg-opacity-40">
+        <div className="container mx-auto px-4 h-full flex items-center">
+          <div className="text-white max-w-2xl">
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-5xl font-playfair mb-6"
             >
-              View Products
-            </Button>
-          </motion.div>
+              Professional Jewelry Display
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-xl mb-8"
+            >
+              Elevate your jewelry presentation with our premium displays
+            </motion.p>
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleRedirect}
+              className="bg-white text-black px-8 py-3 rounded-md hover:bg-gray-100 transition duration-300"
+            >
+              Shop Now
+            </motion.button>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   )
 } 

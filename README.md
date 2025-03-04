@@ -5,49 +5,44 @@ A modern e-commerce website for jewelry display and sales, built with Next.js 14
 ## Features
 
 - 🛍️ Product browsing and searching
-- 🛒 Shopping cart management
-- 👤 User authentication
-- 📱 Responsive design
-- 💳 Manual checkout process
-- 📧 Order confirmation emails
+- 📱 Responsive design for all devices
 - 🎨 Beautiful UI with animations
+- 📧 Contact form with email notifications
+- 🔒 Admin dashboard with authentication
+- 🌐 SEO optimized
+- 🚀 High performance & accessibility
+- 🌍 Internationalization support
 
 ## Tech Stack
 
-- **Framework:** Next.js 14
+- **Framework:** Next.js 14 (App Router)
+- **Database:** PostgreSQL with Prisma ORM
 - **Styling:** Tailwind CSS
 - **UI Components:** shadcn/ui
 - **Authentication:** NextAuth.js
-- **Database:** PostgreSQL
-- **ORM:** Prisma
-- **Email Service:** Resend
-- **Animations:** Framer Motion
-- **State Management:** React Hooks
-- **Form Handling:** React Hook Form
-- **Validation:** Zod
-- **Icons:** Lucide Icons
+- **Email:** Resend
+- **Deployment:** Vercel
+- **Analytics:** Vercel Analytics & Google Analytics
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+ 
-- PostgreSQL
-- npm or yarn
+- PNPM
+- PostgreSQL database
 
 ### Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/sy-jewelry.git
-cd sy-jewelry
+git clone https://github.com/yourusername/sy-jewelry-display.git
+cd sy-jewelry-display
 ```
 
 2. Install dependencies:
 ```bash
-npm install
-# or
-yarn install
+pnpm install
 ```
 
 3. Set up environment variables:
@@ -55,10 +50,11 @@ yarn install
 cp .env.example .env
 ```
 
-4. Update the `.env` file with your configuration:
+4. Update `.env` with your configuration:
 ```env
 # Database
-DATABASE_URL="postgresql://user:password@localhost:5432/sy_jewelry"
+DATABASE_URL="postgresql://..."
+DIRECT_URL="postgresql://..."
 
 # NextAuth
 NEXTAUTH_SECRET="your-secret-key"
@@ -66,45 +62,128 @@ NEXTAUTH_URL="http://localhost:3000"
 
 # Email (Resend)
 RESEND_API_KEY="your-resend-api-key"
+ADMIN_EMAIL="your-admin-email"
+
+# Analytics
+NEXT_PUBLIC_GA_ID="your-ga-id"
 ```
 
-5. Run database migrations:
+5. Initialize the database:
 ```bash
-npx prisma migrate dev
+pnpm prisma generate
+pnpm prisma db push
+pnpm run db:seed
 ```
 
 6. Start the development server:
 ```bash
-npm run dev
-# or
-yarn dev
+pnpm dev
 ```
 
-7. Open [http://localhost:3000](http://localhost:3000) in your browser.
+Visit `http://localhost:3000` to see your application.
 
 ## Project Structure
 
 ```
-src/
-├── app/              # Next.js app directory
-├── components/       # React components
-├── lib/             # Utility functions and configurations
-├── hooks/           # Custom React hooks
-├── types/           # TypeScript type definitions
-└── styles/          # Global styles
+├── prisma/               # Database schema and migrations
+├── public/              # Static assets
+├── scripts/             # Build and setup scripts
+├── src/
+│   ├── app/            # Next.js app router pages
+│   ├── components/     # React components
+│   ├── lib/           # Utility functions
+│   ├── types/         # TypeScript types
+│   └── hooks/         # Custom React hooks
 ```
+
+## Key Features Documentation
+
+### Authentication
+
+The application uses NextAuth.js for authentication. Admin users can be created using:
+
+```bash
+pnpm run create-admin
+```
+
+Default admin credentials:
+- Email: admin@example.com
+- Password: admin123
+
+### Database Models
+
+- **User**: Admin user accounts
+- **Category**: Product categories
+- **BlogPost**: Blog articles
+- **ContactMessage**: Contact form submissions
+
+### API Routes
+
+- `POST /api/contact` - Submit contact form
+- `GET /api/messages` - Get all contact messages (admin only)
+- `GET /api/products` - Get all products
+- `GET /api/blog` - Get blog posts
+
+### Internationalization
+
+The site supports multiple languages:
+- English (default)
+- Chinese
+
+Language files are located in `src/app/i18n/locales/`.
+
+### Performance Optimization
+
+- Images are automatically optimized
+- CSS is minified in production
+- Code splitting and lazy loading
+- Static page generation where possible
+
+### SEO
+
+- Dynamic meta tags
+- Structured data for products
+- Automatic sitemap generation
+- robots.txt configuration
+
+## Development Workflow
+
+1. Create a new branch for your feature:
+```bash
+git checkout -b feature/your-feature-name
+```
+
+2. Make your changes and commit:
+```bash
+git add .
+git commit -m "feat: add your feature"
+```
+
+3. Push changes and create a pull request:
+```bash
+git push origin feature/your-feature-name
+```
+
+## Deployment
+
+The application is configured for deployment on Vercel:
+
+1. Push your changes to GitHub
+2. Connect your repository to Vercel
+3. Configure environment variables
+4. Deploy
 
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ## Acknowledgments
 
