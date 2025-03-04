@@ -20,6 +20,7 @@ const nextConfig = {
     webVitalsAttribution: ['CLS', 'LCP'],
     skipTrailingSlashRedirect: true,
     missingSuspenseWithCSRError: false,
+    optimizeFonts: true,
   },
   typescript: {
     ignoreBuildErrors: true

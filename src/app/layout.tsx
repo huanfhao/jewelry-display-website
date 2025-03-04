@@ -8,9 +8,7 @@ import dynamic from 'next/dynamic'
 const inter = Inter({ 
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-inter',
   preload: true,
-  fallback: ['system-ui', 'arial']
 })
 
 const LoadingFallback = dynamic(() => import('@/components/common/LoadingFallback'))

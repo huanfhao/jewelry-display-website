@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { getToken } from 'next-auth/jwt'
 
 // 使用内存存储请求记录
 const rateLimit = new Map<string, { count: number; timestamp: number }>()
@@ -11,6 +12,15 @@ const RATE_LIMIT = {
 }
 
 export async function middleware(request: NextRequest) {
+  const token = await getToken({ req: request })
+  
+  // 检查是否访问管理员页面
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    if (!token || token.role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/auth/signin', request.url))
+    }
+  }
+
   // 检查 Cookie 同意
   const cookieConsent = request.cookies.get('cookie-consent')
 
@@ -63,5 +73,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  matcher: [
+    '/admin/:path*',
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 } 
