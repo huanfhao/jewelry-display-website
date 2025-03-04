@@ -1,11 +1,19 @@
+import type { Comment } from '@prisma/client'
+
+export interface CommentWithPost extends Omit<Comment, 'post'> {
+  post: {
+    title: string
+  }
+}
+
 export interface ContactMessage {
-  id?: string
+  id: string
   name: string
   email: string
   message: string
-  read?: boolean
-  createdAt?: Date
-  updatedAt?: Date
+  read: boolean
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface AdminAccess {
