@@ -56,3 +56,30 @@ export interface CookieData {
   category: string
 }
 
+export interface SerializedContactMessage {
+  id: string
+  name: string
+  email: string
+  message: string
+  read: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface SerializedCommentWithPost extends Omit<Comment, 'post' | 'createdAt' | 'updatedAt'> {
+  post: {
+    title: string
+  }
+  createdAt: string
+  updatedAt: string
+}
+
+export interface SerializedPerformanceMetric {
+  id: string
+  name: string
+  value: number
+  label?: string
+  page?: string
+  createdAt: string
+}
+

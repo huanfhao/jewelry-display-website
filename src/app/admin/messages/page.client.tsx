@@ -2,13 +2,12 @@
 
 import { useState } from 'react'
 import { formatDate } from '@/lib/utils'
-import type { ContactMessage, CommentWithPost, PerformanceMetric } from '@/types'
-import type { Comment } from '@prisma/client'
+import type { SerializedContactMessage, SerializedCommentWithPost, SerializedPerformanceMetric } from '@/types'
 
 interface AdminMessagesClientProps {
-  initialMessages: ContactMessage[]
-  initialComments: CommentWithPost[]
-  initialMetrics: PerformanceMetric[]
+  initialMessages: SerializedContactMessage[]
+  initialComments: SerializedCommentWithPost[]
+  initialMetrics: SerializedPerformanceMetric[]
 }
 
 export default function AdminMessagesClient({
@@ -16,9 +15,9 @@ export default function AdminMessagesClient({
   initialComments,
   initialMetrics
 }: AdminMessagesClientProps) {
-  const [messages, setMessages] = useState(initialMessages)
-  const [comments, setComments] = useState(initialComments)
-  const [metrics] = useState(initialMetrics)
+  const [messages, setMessages] = useState<SerializedContactMessage[]>(initialMessages)
+  const [comments, setComments] = useState<SerializedCommentWithPost[]>(initialComments)
+  const [metrics] = useState<SerializedPerformanceMetric[]>(initialMetrics)
 
   const handleMarkAsRead = async (id: string) => {
     try {
