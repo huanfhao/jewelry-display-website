@@ -6,25 +6,32 @@ import Link from 'next/link'
 
 const categories = [
   {
-    id: 'rings',
-    title: 'Rings',
-    description: 'Unique Design Collection',
+    id: 'jewelry-boxes',
+    title: 'Jewelry Boxes',
+    description: 'Premium Quality Collection',
     image: '/images/banner1.jpg',
-    link: '/products?category=rings'
+    link: '/products?category=jewelry-boxes'
   },
   {
-    id: 'necklaces',
-    title: 'Necklaces',
-    description: 'Elegant Collection',
+    id: 'jewelry-display-stands',
+    title: 'Jewelry Display Stands',
+    description: 'Professional Display Solutions',
     image: '/images/banner2.jpg',
-    link: '/products?category=necklaces'
+    link: '/products?category=jewelry-display-stands'
   },
   {
-    id: 'earrings',
-    title: 'Earrings',
-    description: 'Stylish Collection',
+    id: 'jewelry-display-props',
+    title: 'Jewelry Display Props',
+    description: 'Creative Display Elements',
     image: '/images/banner3.jpg',
-    link: '/products?category=earrings'
+    link: '/products?category=jewelry-display-props'
+  },
+  {
+    id: 'jewelry-display-trays',
+    title: 'Jewelry Display Trays',
+    description: 'Organized Display Solutions',
+    image: '/images/banner4.jpg',
+    link: '/products?category=jewelry-display-trays'
   }
 ]
 
@@ -32,31 +39,22 @@ export default function CategoriesContent() {
   return (
     <div className="container mx-auto px-4 py-24 mt-16">
       <h1 className="text-4xl font-light mb-8">Categories</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {categories.map((category) => (
-          <Link 
+          <Link
             key={category.id}
             href={category.link}
-            className="group relative h-80 overflow-hidden rounded-lg bg-gray-100"
+            className="group relative overflow-hidden rounded-lg aspect-square"
           >
-            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors z-10" />
-            <div className="relative w-full h-full">
-              <Image
-                src={category.image}
-                alt={category.title}
-                fill
-                className="object-cover transform group-hover:scale-105 transition-transform duration-500"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                priority={category.id === 'rings'}
-                quality={90}
-                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABQODxIPDRQSEBIXFRQdHx4eHRoaHSQtJSEkLzYyLy8yMi8vLzI3Pj0zNzJFREVFRUVFRUVFRUVFRUVFRUVFRUX/2wBDAR0XFyQcJB4eJEQzLjNERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERET/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
-              />
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center z-20">
-              <div className="text-center text-white">
-                <h2 className="text-2xl font-light mb-2">{category.title}</h2>
-                <p className="text-sm opacity-80">{category.description}</p>
-              </div>
+            <Image
+              src={category.image}
+              alt={category.title}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-black/40 flex flex-col justify-end p-6 text-white">
+              <h2 className="text-2xl font-medium mb-2">{category.title}</h2>
+              <p className="text-sm opacity-90">{category.description}</p>
             </div>
           </Link>
         ))}

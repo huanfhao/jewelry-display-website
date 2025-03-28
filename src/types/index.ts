@@ -1,4 +1,6 @@
 import type { Comment } from '@prisma/client'
+import type { Product as PrismaProduct } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 
 export interface CommentWithPost extends Omit<Comment, 'post'> {
   post: {
@@ -38,15 +40,15 @@ export interface PerformanceMetric {
   createdAt: Date
 }
 
-export interface Product {
-  id: string
-  title: string
-  description: string
-  image: string
-  price: number
-  slug: string
-  category?: string
-}
+export type Product = Prisma.ProductGetPayload<{
+  include: {
+    _count: {
+      select: {
+        inquiries: true
+      }
+    }
+  }
+}>
 
 export interface CookieData {
   name: string

@@ -1,47 +1,45 @@
 'use client'
 
-import Link from 'next/link'
-import Image from 'next/image'
-import { Product } from '@/types'
-
-const STORE_URL = 'https://store.flylinking.com/s/2UPEH35FWO'
+import { useRouter } from 'next/navigation'
+import type { Product } from '@prisma/client'
+import ProductGrid from './ProductGrid'
 
 interface ProductListProps {
-  products: Product[]
+  products: (Product & {
+    _count: {
+      inquiries: number
+    }
+  })[]
 }
 
 export default function ProductList({ products }: ProductListProps) {
-  const handleRedirect = () => {
-    window.location.href = STORE_URL
+  const router = useRouter()
+
+  const handleProductClick = (slug: string) => {
+    router.push(`/products/${slug}`)
   }
+
+  const formattedProducts = products.map(product => ({
+    title: product.name,
+    image: product.images[0] || '/images/hero.jpg',
+    description: product.description || 'No description available',
+    slug: product.slug,
+    category: {
+      name: product.category || 'Uncategorized'
+    },
+    price: product.price,
+    _count: {
+      inquiries: product._count.inquiries
+    }
+  }))
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Our Products</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map(product => (
-          <div key={product.id} className="border rounded-lg overflow-hidden">
-            <img 
-              src={product.image} 
-              alt={product.title}
-              className="w-full h-64 object-cover"
-            />
-            <div className="p-4">
-              <h2 className="text-xl font-semibold mb-2">{product.title}</h2>
-              <p className="text-gray-600 mb-4">{product.description}</p>
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-bold">${product.price}</span>
-                <Link 
-                  href={`/products/${product.slug}`}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                >
-                  View Details
-                </Link>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <ProductGrid 
+        products={formattedProducts}
+        onProductClick={handleProductClick}
+      />
     </div>
   )
 } 

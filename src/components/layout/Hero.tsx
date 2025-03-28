@@ -18,8 +18,8 @@ export default function Hero() {
       <div className="absolute inset-0 bg-black/30" />
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center text-white">
-          <h1 className="text-4xl md:text-6xl font-bold">SY Jewelry</h1>
-          <p className="mt-4 text-xl">精美珠宝，独特设计，匠心之作</p>
+          <h1 className="text-4xl md:text-6xl font-bold">SY Jewelry Display</h1>
+          <p className="mt-4 text-xl">Leading Professional Jewelry Display Manufacturer in China</p>
         </div>
       </div>
     </div>

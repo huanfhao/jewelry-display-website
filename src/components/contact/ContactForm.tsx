@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { z } from 'zod'
+import { Loader2 } from 'lucide-react'
 
 // 定义表单验证模式
 const contactSchema = z.object({
@@ -25,6 +26,7 @@ export default function ContactForm() {
   const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: '' })
   const [correctAnswer, setCorrectAnswer] = useState(0)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' })
 
   useEffect(() => {
     generateCaptcha()
@@ -37,16 +39,23 @@ export default function ContactForm() {
     setCorrectAnswer(num1 + num2)
   }
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+    
+    // 清除相关字段的错误（当用户开始编辑时）
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[name]
+        return newErrors
+      })
+    }
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setErrors({})
-
-    const formData = new FormData(event.currentTarget)
-    const data = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      message: formData.get('message') as string,
-    }
 
     // 验证人机验证答案
     if (parseInt(captcha.answer) !== correctAnswer) {
@@ -57,7 +66,7 @@ export default function ContactForm() {
 
     // 表单验证
     try {
-      contactSchema.parse(data)
+      contactSchema.parse(formData)
     } catch (error) {
       if (error instanceof z.ZodError) {
         const formattedErrors: Record<string, string> = {}
@@ -78,18 +87,40 @@ export default function ContactForm() {
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(formData)
       })
 
+      const result = await response.json()
+
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to send message')
+        // 处理服务器返回的验证错误
+        if (response.status === 400 && result.details) {
+          const serverErrors: Record<string, string> = {}
+          
+          // 格式化来自服务器的Zod错误
+          Object.entries(result.details).forEach(([field, error]) => {
+            if (typeof error === 'object' && error && '_errors' in error) {
+              const errorsArray = (error as { _errors: string[] })._errors
+              if (errorsArray.length > 0) {
+                serverErrors[field] = errorsArray[0]
+              }
+            }
+          })
+          
+          setErrors(serverErrors)
+          toast.error('Please correct the errors in the form')
+        } else {
+          throw new Error(result.error || result.message || 'Failed to send message')
+        }
+      } else {
+        // 成功处理
+        setSuccess(true)
+        toast.success('Message sent successfully! We will reply to you soon.')
+        
+        // 重置表单
+        setFormData({ name: '', email: '', message: '' })
+        generateCaptcha()
       }
-      
-      setSuccess(true)
-      toast.success('Message sent successfully! We will reply to you soon.')
-      event.currentTarget.reset()
-      generateCaptcha()
     } catch (error) {
       console.error('Error:', error)
       toast.error(error instanceof Error ? error.message : 'Failed to send message, please try again later')
@@ -108,6 +139,8 @@ export default function ContactForm() {
           className="h-12"
           placeholder="Enter your name"
           disabled={loading}
+          value={formData.name}
+          onChange={handleChange}
         />
         {errors.name && (
           <p className="mt-1 text-sm text-red-500">{errors.name}</p>
@@ -123,6 +156,8 @@ export default function ContactForm() {
           className="h-12"
           placeholder="Enter your email"
           disabled={loading}
+          value={formData.email}
+          onChange={handleChange}
         />
         {errors.email && (
           <p className="mt-1 text-sm text-red-500">{errors.email}</p>
@@ -138,6 +173,8 @@ export default function ContactForm() {
           className="resize-none"
           placeholder="Enter your message"
           disabled={loading}
+          value={formData.message}
+          onChange={handleChange}
         />
         {errors.message && (
           <p className="mt-1 text-sm text-red-500">{errors.message}</p>
@@ -171,7 +208,12 @@ export default function ContactForm() {
         disabled={loading} 
         className="w-full h-12 text-base"
       >
-        {loading ? 'Sending...' : 'Send Message'}
+        {loading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Sending...
+          </>
+        ) : 'Send Message'}
       </Button>
     </form>
   )

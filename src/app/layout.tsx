@@ -5,10 +5,26 @@ import 'nprogress/nprogress.css'
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 
+// 唤醒数据库的函数
+async function warmupDatabase() {
+  try {
+    await fetch('/api/db-warmup', { cache: 'no-store' });
+    console.log('Database warmed up');
+  } catch (error) {
+    console.error('Failed to warm up database:', error);
+  }
+}
+
+// 尝试预热数据库
+if (typeof window !== 'undefined') {
+  warmupDatabase();
+}
+
 const inter = Inter({ 
   subsets: ['latin'],
   display: 'swap',
   preload: true,
+  variable: '--font-inter',
 })
 
 const LoadingFallback = dynamic(() => import('@/components/common/LoadingFallback'))
@@ -45,10 +61,9 @@ const jsonLd = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://syjewelrydisplay.cn'),
   title: {
     template: '%s | SY Jewelry Display',
-    default: 'SY Jewelry Display - Professional Jewelry Display Manufacturer'
+    default: 'SY Jewelry Display - Professional Jewelry Display Manufacturer',
   },
   description: 'Leading manufacturer of high-quality jewelry displays, showcases, and retail store fixtures. Custom design solutions for jewelry stores worldwide.',
   keywords: [
@@ -57,8 +72,18 @@ export const metadata: Metadata = {
     'retail store fixtures',
     'custom jewelry displays',
     'jewelry store equipment',
-    'display solutions'
+    'display solutions',
+    'wholesale',
+    'B2B'
   ].join(', '),
+  authors: [{ name: 'SY Jewelry Display' }],
+  creator: 'SY Jewelry Display',
+  publisher: 'SY Jewelry Display',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   icons: {
     icon: [
       { url: '/favicon.ico' },
@@ -159,9 +184,8 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className={`${inter.className} antialiased`}>
-        <Suspense fallback={<LoadingFallback />}>
-          <RootClientLayout>{children}</RootClientLayout>
-        </Suspense>
+        <RootClientLayout>{children}</RootClientLayout>
+
       </body>
     </html>
   )

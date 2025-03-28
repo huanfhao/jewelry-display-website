@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import BlogList from '@/components/blog/BlogList'
 
 interface BlogPost {
@@ -19,12 +19,22 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 
 export default async function BlogPage() {
-  const posts = await prisma.$queryRaw<BlogPost[]>`
-    SELECT id, title, slug, excerpt, "coverImage", "publishedAt"
-    FROM blog_posts
-    WHERE published = true
-    ORDER BY "publishedAt" DESC
-  `;
+  const posts = await prisma.blogPost.findMany({
+    where: {
+      published: true
+    },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      excerpt: true,
+      coverImage: true,
+      publishedAt: true
+    },
+    orderBy: {
+      publishedAt: 'desc'
+    }
+  });
 
   return (
     <div className="container mx-auto px-4 py-12">

@@ -1,45 +1,54 @@
 import { Metadata } from 'next'
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   metadataBase: new URL('https://syjewelrydisplay.cn'),
   title: {
     template: '%s | SY Jewelry Display',
-    default: 'SY Jewelry Display - Professional Jewelry Display Manufacturer'
+    default: 'SY Jewelry Display - Leading Professional Jewelry Display Manufacturer in China'
   },
-  description: 'Leading manufacturer of high-quality jewelry displays, showcases, and store fixtures. Custom design solutions for jewelry stores, retail displays, and exhibitions.',
+  description: 'SY Jewelry Display is China\'s leading manufacturer of premium jewelry display solutions, offering professional display props, stands, and retail fixtures for global jewelry businesses.',
   keywords: [
-    'jewelry display',
-    'jewelry showcase',
-    'jewelry store fixtures',
-    'retail display stands',
-    'custom jewelry display',
-    'wholesale display props',
-    'acrylic display',
-    'ring display',
-    'necklace display',
-    'watch display stand',
+    'jewelry display manufacturer',
+    'jewelry showcase design',
+    'retail store fixtures',
+    'custom jewelry displays',
     'jewelry store equipment',
-    'display manufacturer'
-  ],
-  authors: [{ name: 'SY Jewelry Display' }],
+    'display solutions',
+    'wholesale',
+    'B2B',
+    'China manufacturer',
+    'professional jewelry display'
+  ].join(', '),
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' }
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png' }
+    ],
+    shortcut: [
+      { url: '/favicon.ico' }
+    ]
+  },
   openGraph: {
     type: 'website',
     siteName: 'SY Jewelry Display',
     title: 'Professional Jewelry Display Solutions',
     description: 'Custom jewelry display manufacturer offering premium quality display stands and retail solutions.',
-    images: [
-      {
-        url: '/images/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'SY Jewelry Display - Professional Display Solutions'
-      }
-    ]
+    url: 'https://syjewelrydisplay.cn',
+    images: [{
+      url: '/images/og-image.jpg',
+      width: 1200,
+      height: 630,
+      alt: 'SY Jewelry Display - Professional Display Solutions'
+    }]
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SY Jewelry Display - Professional Display Solutions',
-    description: 'Custom jewelry display manufacturer offering premium quality display stands and retail solutions.',
+    title: 'Professional Jewelry Display - Custom Solutions',
+    description: 'Leading manufacturer of jewelry displays and store fixtures',
     images: ['/images/og-image.jpg']
   },
   alternates: {
@@ -63,4 +72,18 @@ export const metadata: Metadata = {
   verification: {
     google: 'your-google-verification-code'
   }
-} 
+}
+
+// 主页的metadata
+export const homeMetadata: Metadata = {
+  ...baseMetadata,
+  title: 'SY Jewelry Display - Leading Professional Jewelry Display Manufacturer in China',
+  description: 'SY Jewelry Display is China\'s leading manufacturer of premium jewelry display solutions, offering professional display props, stands, and retail fixtures for global jewelry businesses.',
+  openGraph: {
+    ...baseMetadata.openGraph,
+    title: 'SY Jewelry Display - Leading Professional Jewelry Display Manufacturer in China',
+    description: 'SY Jewelry Display is China\'s leading manufacturer of premium jewelry display solutions, offering professional display props, stands, and retail fixtures for global jewelry businesses.'
+  }
+}
+
+export default baseMetadata 

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
 
 interface Product {
   id: string
@@ -25,13 +26,13 @@ export default function FeaturedProducts() {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const response = await fetch('/api/products?limit=3')
+        const response = await fetch('/api/products?limit=3&featured=true')
         if (!response.ok) throw new Error('Failed to fetch products')
         const data = await response.json()
-        console.log('Featured products data:', data)
         setProducts(data)
       } catch (error) {
         console.error('Error fetching products:', error)
+        setProducts([])
       } finally {
         setLoading(false)
       }
@@ -57,7 +58,7 @@ export default function FeaturedProducts() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {[1, 2, 3].map((index) => (
               <div key={index} className="animate-pulse">
-                <div className="relative aspect-[3/4] mb-6 bg-gray-200" />
+                <div className="relative aspect-[1/1] mb-6 bg-gray-200 rounded-lg" />
                 <div className="text-center space-y-3">
                   <div className="h-4 bg-gray-200 w-1/4 mx-auto" />
                   <div className="h-6 bg-gray-200 w-3/4 mx-auto" />
@@ -98,21 +99,24 @@ export default function FeaturedProducts() {
                 className="group"
               >
                 <Link href={`/products/${product.id}`}>
-                  <div className="relative aspect-[3/4] mb-6 overflow-hidden bg-gray-100">
-                    <Image
-                      src={imageUrl}
-                      alt={product.name}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      priority={index === 0}
-                      quality={85}
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      onError={() => handleImageError(product.id, imageUrl)}
-                    />
+                  <div className="relative w-full pb-[100%] mb-6 overflow-hidden bg-gray-50 rounded-lg">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <OptimizedImage
+                        src={imageUrl}
+                        alt={product.name}
+                        width={480}
+                        height={480}
+                        quality={90}
+                        className="w-full h-full object-contain hover:scale-105 transition-transform duration-700"
+                        onError={() => handleImageError(product.id, imageUrl)}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        priority={index === 0}
+                      />
+                    </div>
                   </div>
                   <div className="text-center">
                     <span className="text-xs uppercase tracking-wider text-gray-500">{product.category.name}</span>
-                    <h3 className="text-lg mt-2 mb-1">{product.name}</h3>
+                    <h3 className="text-lg mt-2 mb-1 font-medium">{product.name}</h3>
                     <p className="text-sm text-gray-600">${product.price.toLocaleString()}</p>
                   </div>
                 </Link>

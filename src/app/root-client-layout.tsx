@@ -8,6 +8,8 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import FacebookPixel from '@/components/analytics/FacebookPixel'
 import dynamic from 'next/dynamic'
+import { SessionProvider } from 'next-auth/react'
+import { Toaster } from 'react-hot-toast'
 
 const AccessibilityWidget = dynamic(() => import('@/components/accessibility/AccessibilityWidget'), {
   ssr: false,
@@ -19,7 +21,7 @@ export default function RootClientLayout({ children }: { children: React.ReactNo
   const theme = preferences.theme || 'light'
 
   return (
-    <>
+    <SessionProvider>
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-grow">
@@ -32,6 +34,7 @@ export default function RootClientLayout({ children }: { children: React.ReactNo
       <VercelAnalytics />
       <SpeedInsights />
       <FacebookPixel />
-    </>
+      <Toaster />
+    </SessionProvider>
   )
 } 
