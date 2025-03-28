@@ -4,6 +4,7 @@ import './globals.css'
 import 'nprogress/nprogress.css'
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
+import { initializeDatabase } from '@/lib/db-init'
 
 // 唤醒数据库的函数
 async function warmupDatabase() {
@@ -146,11 +147,14 @@ export function generateStaticParams() {
   ]
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // 在服务器端初始化数据库
+  await initializeDatabase()
+
   return (
     <html lang="en">
       <head>
