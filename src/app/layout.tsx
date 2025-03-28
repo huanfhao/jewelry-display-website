@@ -6,21 +6,6 @@ import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { initializeDatabase } from '@/lib/db-init'
 
-// 唤醒数据库的函数
-async function warmupDatabase() {
-  try {
-    await fetch('/api/db-warmup', { cache: 'no-store' });
-    console.log('Database warmed up');
-  } catch (error) {
-    console.error('Failed to warm up database:', error);
-  }
-}
-
-// 尝试预热数据库
-if (typeof window !== 'undefined') {
-  warmupDatabase();
-}
-
 const inter = Inter({ 
   subsets: ['latin'],
   display: 'swap',
