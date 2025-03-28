@@ -10,6 +10,7 @@ import FacebookPixel from '@/components/analytics/FacebookPixel'
 import dynamic from 'next/dynamic'
 import { SessionProvider } from 'next-auth/react'
 import { Toaster } from 'react-hot-toast'
+import { useEffect } from 'react'
 
 const AccessibilityWidget = dynamic(() => import('@/components/accessibility/AccessibilityWidget'), {
   ssr: false,
@@ -19,6 +20,23 @@ const AccessibilityWidget = dynamic(() => import('@/components/accessibility/Acc
 export default function RootClientLayout({ children }: { children: React.ReactNode }) {
   const { preferences } = useUserPreferences()
   const theme = preferences.theme || 'light'
+
+  useEffect(() => {
+    // 调用数据库预热API
+    const warmupDatabase = async () => {
+      try {
+        const response = await fetch('/api/db-warmup')
+        const data = await response.json()
+        if (!data.success) {
+          console.error('Database warmup failed:', data.message)
+        }
+      } catch (error) {
+        console.error('Error during database warmup:', error)
+      }
+    }
+
+    warmupDatabase()
+  }, [])
 
   return (
     <SessionProvider>
