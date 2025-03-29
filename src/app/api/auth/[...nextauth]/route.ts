@@ -19,6 +19,17 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Missing credentials');
         }
 
+        // 检查是否是管理员账户
+        if (credentials.email === 'admin@example.com' && credentials.password === 'admin123') {
+          return {
+            id: 'admin-user-id',
+            email: 'admin@example.com',
+            name: 'Admin',
+            role: 'ADMIN',
+          };
+        }
+
+        // 如果不是管理员，则检查数据库
         const user = await prisma.user.findUnique({
           where: {
             email: credentials.email,
@@ -52,21 +63,25 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/signin',
+    error: '/auth/error',
   },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role;
+        token.id = user.id;
       }
       return token;
     },
     async session({ session, token }) {
       if (session?.user) {
         session.user.role = token.role;
+        session.user.id = token.id;
       }
       return session;
     },
   },
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);
