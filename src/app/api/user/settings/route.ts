@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import prisma from '@/lib/prisma'
-import { handleApiError } from '@/app/api/error'
+import { handleApiError } from '@/lib/api-error'
 import { z } from 'zod'
 
 // 定义设置验证模式
