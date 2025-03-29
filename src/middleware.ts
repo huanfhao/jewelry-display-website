@@ -63,7 +63,7 @@ export async function middleware(request: NextRequest) {
   // 设置CSP头
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' *.vercel.app vercel.live *.facebook.net *.google-analytics.com;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' *.vercel.app vercel.live *.facebook.net *.google-analytics.com *.salesmartly.com;
     style-src 'self' 'unsafe-inline' fonts.googleapis.com;
     img-src 'self' blob: data: https://res.cloudinary.com *.facebook.com *.google-analytics.com;
     font-src 'self' fonts.gstatic.com;
@@ -72,7 +72,7 @@ export async function middleware(request: NextRequest) {
     form-action 'self';
     frame-ancestors 'self' vercel.live;
     frame-src 'self' vercel.live *.facebook.com;
-    connect-src 'self' vitals.vercel-insights.com *.facebook.com *.google-analytics.com;
+    connect-src 'self' vitals.vercel-insights.com *.facebook.com *.google-analytics.com *.salesmartly.com;
     upgrade-insecure-requests;
   `.replace(/\s{2,}/g, ' ').trim()
 
