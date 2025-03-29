@@ -2,6 +2,7 @@ import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import NextAuth from 'next-auth/next';
 import { PrismaClient } from '@prisma/client';
+import { authDebugOptions } from '@/lib/auth-debug';
 
 const prisma = new PrismaClient();
 
@@ -146,5 +147,6 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-const handler = NextAuth(authOptions);
+// 使用调试版本的认证选项
+const handler = NextAuth(authDebugOptions);
 export { handler as GET, handler as POST }; 
