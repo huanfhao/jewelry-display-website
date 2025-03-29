@@ -60,14 +60,28 @@ export async function middleware(request: NextRequest) {
 
   const response = NextResponse.next()
 
-  // 添加安全相关的响应头
-  response.headers.set('X-Frame-Options', 'DENY')
+  // 设置CSP头
+  const cspHeader = `
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' *.vercel.app vercel.live;
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' blob: data: https://res.cloudinary.com;
+    font-src 'self';
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'self' vercel.live;
+    frame-src 'self' vercel.live;
+    connect-src 'self' vitals.vercel-insights.com;
+    upgrade-insecure-requests;
+  `.replace(/\s{2,}/g, ' ').trim()
+
+  // 添加安全头
+  response.headers.set('Content-Security-Policy', cspHeader)
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN')
   response.headers.set('X-Content-Type-Options', 'nosniff')
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
-  response.headers.set(
-    'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: https://assets.salesmartly.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https: https://assets.salesmartly.com;"
-  )
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
 
   return response
 }
