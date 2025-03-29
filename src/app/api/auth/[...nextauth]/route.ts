@@ -1,6 +1,9 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import NextAuth from 'next-auth/next';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 // 扩展 Session 类型
 declare module 'next-auth' {
@@ -41,22 +44,31 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         try {
           if (!credentials?.email || !credentials?.password) {
-            console.error('Missing credentials:', { email: !!credentials?.email, password: !!credentials?.password });
+            console.error('Missing credentials');
             return null;
           }
 
-          // 只检查管理员账户
-          if (credentials.email === 'admin@example.com' && credentials.password === 'admin123') {
-            console.log('Admin login successful');
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email }
+          });
+
+          if (!user) {
+            console.error('User not found');
+            return null;
+          }
+
+          // 在实际应用中，这里应该使用 bcrypt 比较密码
+          // 这里临时使用简单比较，后续会改进
+          if (user.password === credentials.password) {
             return {
-              id: 'admin-user-id',
-              email: 'admin@example.com',
-              name: 'Admin',
-              role: 'ADMIN',
+              id: user.id,
+              email: user.email,
+              name: user.name || 'User',
+              role: user.role || 'USER',
             };
           }
 
-          console.error('Invalid credentials for:', credentials.email);
+          console.error('Invalid password');
           return null;
         } catch (error) {
           console.error('Authorization error:', error);

@@ -3,6 +3,15 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import prisma from '@/lib/prisma'
 import { handleApiError } from '@/app/api/error'
+import { z } from 'zod'
+
+// 定义设置验证模式
+const settingsSchema = z.object({
+  language: z.enum(['en', 'zh']).optional(),
+  theme: z.enum(['light', 'dark']).optional(),
+  emailNotifications: z.boolean().optional(),
+  marketingEmails: z.boolean().optional(),
+})
 
 export async function PUT(request: Request) {
   try {
@@ -17,19 +26,29 @@ export async function PUT(request: Request) {
 
     const data = await request.json()
     
+    // 验证输入数据
+    const validatedData = settingsSchema.parse(data)
+    
     // 更新用户设置
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
-      data: {
-        language: data.language,
-        theme: data.theme,
-        emailNotifications: data.emailNotifications,
-        marketingEmails: data.marketingEmails,
+      data: validatedData,
+      select: {
+        language: true,
+        theme: true,
+        emailNotifications: true,
+        marketingEmails: true,
       },
     })
 
     return NextResponse.json(updatedUser)
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: error.errors },
+        { status: 400 }
+      )
+    }
     return handleApiError(error)
   }
 }
@@ -55,6 +74,13 @@ export async function GET() {
         marketingEmails: true,
       },
     })
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
+    }
 
     return NextResponse.json(user)
   } catch (error) {

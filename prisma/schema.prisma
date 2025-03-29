@@ -170,7 +170,7 @@ model User {
   verified              Boolean         @default(false)
   verificationDocuments String[]
   language              String?         @default("en")
-  theme                 String?         @default("system")
+  theme                 String?         @default("light")
   emailNotifications    Boolean         @default(true)
   marketingEmails       Boolean         @default(false)
   inquiries             Inquiry[]
