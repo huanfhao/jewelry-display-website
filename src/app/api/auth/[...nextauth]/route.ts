@@ -1,8 +1,5 @@
 import { NextAuthOptions } from 'next-auth';
-import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import prisma from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
 import NextAuth from 'next-auth/next';
 
 // 扩展 Session 类型
@@ -34,7 +31,6 @@ declare module 'next-auth/jwt' {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -46,10 +42,10 @@ export const authOptions: NextAuthOptions = {
         try {
           if (!credentials?.email || !credentials?.password) {
             console.error('Missing credentials:', { email: !!credentials?.email, password: !!credentials?.password });
-            throw new Error('Missing credentials');
+            return null;
           }
 
-          // 检查是否是管理员账户
+          // 只检查管理员账户
           if (credentials.email === 'admin@example.com' && credentials.password === 'admin123') {
             console.log('Admin login successful');
             return {
@@ -60,35 +56,8 @@ export const authOptions: NextAuthOptions = {
             };
           }
 
-          // 如果不是管理员，则检查数据库
-          const user = await prisma.user.findUnique({
-            where: {
-              email: credentials.email,
-            },
-          });
-
-          if (!user) {
-            console.error('User not found:', credentials.email);
-            throw new Error('Invalid credentials');
-          }
-
-          const isPasswordValid = await bcrypt.compare(
-            credentials.password,
-            user.password
-          );
-
-          if (!isPasswordValid) {
-            console.error('Invalid password for user:', credentials.email);
-            throw new Error('Invalid credentials');
-          }
-
-          console.log('User login successful:', user.email);
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name || user.email.split('@')[0], // 使用邮箱前缀作为默认名称
-            role: user.role,
-          };
+          console.error('Invalid credentials for:', credentials.email);
+          return null;
         } catch (error) {
           console.error('Authorization error:', error);
           return null;
@@ -162,7 +131,8 @@ export const authOptions: NextAuthOptions = {
     },
   },
   debug: process.env.NODE_ENV === 'development',
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST } 
+export { handler as GET, handler as POST }; 
