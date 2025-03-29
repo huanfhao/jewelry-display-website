@@ -1,24 +1,32 @@
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { prisma } from '@/lib/prisma';
-import { authOptions } from '@/lib/auth';
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 
-// 获取所有消息
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user || session.user.role !== 'ADMIN') {
-      return new NextResponse('Unauthorized', { status: 401 });
-    }
-
-    const messages = await prisma.contactMessage.findMany({
+    // 获取联系表单消息
+    const contactMessages = await prisma.contactMessage.findMany({
       orderBy: { createdAt: 'desc' }
-    });
+    })
 
-    return NextResponse.json(messages);
+    // 获取博客评论，使用 comments 而不是 comment
+    const comments = await prisma.$queryRaw<any[]>`
+      SELECT 
+        c.*,
+        b.title as post_title
+      FROM comments c
+      LEFT JOIN blog_posts b ON c."postId" = b.id
+      ORDER BY c."createdAt" DESC
+    `
+
+    return NextResponse.json({
+      contactMessages,
+      comments
+    })
   } catch (error) {
-    console.error('Error fetching messages:', error);
-    return new NextResponse('Internal error', { status: 500 });
+    console.error('Error fetching messages:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch messages' },
+      { status: 500 }
+    )
   }
 } 

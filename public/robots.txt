@@ -1,0 +1,12 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+# Host
+Host: https://syjewelrydisplay.cn
+
+# Sitemaps
+Sitemap: https://syjewelrydisplay.cn/sitemap.xml
+Sitemap: https://syjewelrydisplay.cn/server-sitemap.xml

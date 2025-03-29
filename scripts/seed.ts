@@ -21,29 +21,29 @@ async function main() {
     // 创建商品分类
     const categories = await Promise.all([
       prisma.category.upsert({
-        where: { id: 'ring-category' },
+        where: { slug: 'rings' },
         update: {},
         create: {
-          id: 'ring-category',
           name: 'Rings',
-          description: 'Beautiful rings for every occasion',
-        },
+          slug: 'rings',
+          description: 'Ring display stands and props'
+        }
       }),
       prisma.category.upsert({
-        where: { id: 'necklace-category' },
+        where: { slug: 'necklaces' },
         update: {},
         create: {
-          id: 'necklace-category',
           name: 'Necklaces',
+          slug: 'necklaces',
           description: 'Elegant necklaces and pendants',
         },
       }),
       prisma.category.upsert({
-        where: { id: 'earring-category' },
+        where: { slug: 'earrings' },
         update: {},
         create: {
-          id: 'earring-category',
           name: 'Earrings',
+          slug: 'earrings',
           description: 'Stunning earrings for any style',
         },
       }),
@@ -52,52 +52,43 @@ async function main() {
     // 创建示例商品
     const products = await Promise.all([
       prisma.product.upsert({
-        where: { id: 'diamond-ring' },
+        where: { slug: 'diamond-ring' },
         update: {},
         create: {
-          id: 'diamond-ring',
-          name: 'Diamond Ring',
+          title: 'Diamond Ring',
           description: 'Beautiful diamond ring with 18K gold band',
+          image: '/images/products/ring-display.jpg',
           price: 999.99,
-          images: [
-            'https://images.unsplash.com/photo-1605100804763-247f67b3557e',
-            'https://images.unsplash.com/photo-1603561591411-07134e71a2a9'
-          ],
-          categoryId: categories[0].id,
+          slug: 'diamond-ring',
+          category: 'Rings',
           stock: 10,
           isFeatured: true,
         },
       }),
       prisma.product.upsert({
-        where: { id: 'pearl-necklace' },
+        where: { slug: 'pearl-necklace' },
         update: {},
         create: {
-          id: 'pearl-necklace',
-          name: 'Pearl Necklace',
+          title: 'Pearl Necklace',
           description: 'Elegant pearl necklace with sterling silver chain',
+          image: '/images/products/necklace-display.jpg',
           price: 299.99,
-          images: [
-            'https://images.unsplash.com/photo-1599643477877-530eb83abc8e',
-            'https://images.unsplash.com/photo-1599643478518-a5e4b12cdb42'
-          ],
-          categoryId: categories[1].id,
+          slug: 'pearl-necklace',
+          category: 'Necklaces',
           stock: 15,
           isFeatured: true,
         },
       }),
       prisma.product.upsert({
-        where: { id: 'sapphire-earrings' },
+        where: { slug: 'sapphire-earrings' },
         update: {},
         create: {
-          id: 'sapphire-earrings',
-          name: 'Sapphire Earrings',
+          title: 'Sapphire Earrings',
           description: 'Stunning sapphire earrings with diamond accents',
+          image: '/images/products/earring-display.jpg',
           price: 599.99,
-          images: [
-            'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908',
-            'https://images.unsplash.com/photo-1602752250015-52934bc45613'
-          ],
-          categoryId: categories[2].id,
+          slug: 'sapphire-earrings',
+          category: 'Earrings',
           stock: 8,
           isFeatured: true,
         },
@@ -109,11 +100,15 @@ async function main() {
     console.log('Categories created:', categories.length);
     console.log('Products created:', products.length);
   } catch (error) {
-    console.error('Error seeding database:', error);
-    process.exit(1);
+    console.error('Seeding error:', error);
+    throw error;
   } finally {
     await prisma.$disconnect();
   }
 }
 
-main(); 
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  }); 

@@ -1,50 +1,119 @@
-import Image from 'next/image';
-import teamImage from '../../../public/images/team.jpg';
+'use client'
+
+import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
 
 export default function AboutPage() {
   return (
-    <div className="py-12 md:py-16">
-      <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-playfair mb-6 md:mb-8 text-center">
-            About Us
-          </h1>
-          
-          <div className="relative aspect-[4/3] md:aspect-video mb-6 md:mb-8">
-            <Image
-              src={teamImage}
-              alt="Our Team"
-              fill
-              className="object-cover object-center rounded-lg"
-              sizes="(max-width: 768px) 100vw, 768px"
-              quality={90}
+    <div className="container mx-auto px-4 py-12">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="max-w-5xl mx-auto"
+      >
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">About Us | SY Jewelry Display</h1>
+          <p className="text-2xl text-gray-700">Elevate Your Jewelry Presentation with Excellence</p>
+        </div>
+
+        {/* Main Content */}
+        <div className="space-y-12">
+          {/* Introduction */}
+          <div className="prose prose-lg max-w-none">
+            <p className="text-gray-600 text-lg leading-relaxed">
+              At SY Jewelry Display, we believe that a beautifully crafted jewelry display is more than just a stand—it's a statement of elegance, professionalism, and quality. Since our establishment in 2018, we have been dedicated to providing high-end jewelry display solutions that enhance the beauty and value of your collections.
+            </p>
+          </div>
+
+          {/* Company Image */}
+          <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-lg my-12">
+            <OptimizedImage
+              src="/images/team.jpg"
+              alt="Our professional team collaborating at a wooden table, showcasing our commitment to teamwork and excellence"
+              width={1920}
+              height={1080}
+              className="object-cover w-full h-full"
+              priority
+              quality={95}
             />
           </div>
 
-          <div className="prose prose-sm md:prose-lg mx-auto px-4 md:px-0">
-            <p>
-              Founded in 2018, SY Jewelry Display specializes in creating premium display 
-              props and accessories for jewelry presentation. Our team combines expertise in 
-              design, materials, and aesthetics to enhance the display of your precious pieces.
+          {/* Who We Are */}
+          <section className="bg-gray-50 rounded-2xl p-8 shadow-sm">
+            <h2 className="text-3xl font-bold mb-6">Who We Are</h2>
+            <p className="text-gray-600 text-lg leading-relaxed">
+              With over 6 years of industry experience, we specialize in designing and manufacturing premium jewelry display trays, cases, and organizers. Our factory, covering 1,000 square meters, is equipped with advanced machinery and a skilled workforce of 30-50 professionals, ensuring top-quality craftsmanship in every piece we produce.
             </p>
-            
-            <h2 className="!mt-8 !mb-4">Our Philosophy</h2>
-            <p>
-              We believe that exceptional jewelry deserves exceptional presentation tools. From 
-              custom display props to innovative accessory designs, we help you create 
-              attractive presentations that highlight your jewelry's beauty.
-            </p>
+          </section>
 
-            <h2 className="!mt-8 !mb-4">Quality & Innovation</h2>
-            <p>
-              Using premium materials and refined craftsmanship, we ensure each display prop 
-              meets the highest standards of quality and practicality. Our designs focus on 
-              both aesthetics and functionality, creating the perfect complement to showcase 
-              your jewelry collection.
+          {/* Why Choose Us */}
+          <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+            <h2 className="text-3xl font-bold mb-6">Why Choose Us?</h2>
+            <div className="grid gap-6">
+              <div className="flex items-start space-x-4">
+                <span className="text-green-500 text-2xl">✔</span>
+                <div>
+                  <h3 className="font-semibold text-xl mb-2">Expert Craftsmanship</h3>
+                  <p className="text-gray-600">We use a combination of solid wood, PU leather, and soft velvet lining, finished with a metal frame to create a luxurious and durable display.</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-4">
+                <span className="text-green-500 text-2xl">✔</span>
+                <div>
+                  <h3 className="font-semibold text-xl mb-2">Elegant & Functional Design</h3>
+                  <p className="text-gray-600">Our minimalist yet sophisticated designs cater to high-end jewelers, independent designers, and retail boutiques.</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-4">
+                <span className="text-green-500 text-2xl">✔</span>
+                <div>
+                  <h3 className="font-semibold text-xl mb-2">Trusted by Global Clients</h3>
+                  <p className="text-gray-600">We proudly serve jewelers in the USA, Canada, UAE, and beyond, offering reliable worldwide shipping and premium-quality products.</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-4">
+                <span className="text-green-500 text-2xl">✔</span>
+                <div>
+                  <h3 className="font-semibold text-xl mb-2">Custom Solutions</h3>
+                  <p className="text-gray-600">Whether you need custom branding, specific sizes, or exclusive designs, our team is here to bring your vision to life.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Our Mission */}
+          <section className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8">
+            <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
+            <p className="text-gray-600 text-lg leading-relaxed">
+              We are committed to helping jewelry brands and retailers showcase their collections with style and confidence. Every detail matters, and our displays are designed to protect, enhance, and elevate your jewelry pieces.
             </p>
-          </div>
+          </section>
+
+          {/* Call to Action */}
+          <section className="text-center bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+            <div className="space-y-4">
+              <p className="text-xl text-blue-600">
+                <span className="text-blue-500 mr-2">🔹</span>
+                Join the many jewelers worldwide who trust SY Jewelry Display for their presentation needs.
+              </p>
+              <div className="mt-8">
+                <Link
+                  href="/contact"
+                  className="inline-block bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors duration-300"
+                >
+                  Contact Us Today
+                </Link>
+                <p className="mt-4 text-gray-600">
+                  Find the perfect display solution for your business!
+                </p>
+              </div>
+            </div>
+          </section>
         </div>
-      </div>
+      </motion.div>
     </div>
-  );
+  )
 } 
