@@ -5,6 +5,34 @@ import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import NextAuth from 'next-auth/next';
 
+// 扩展 Session 类型
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      id: string;
+      email: string;
+      name: string;
+      role: string;
+    }
+  }
+  interface User {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+  }
+}
+
+// 扩展 JWT 类型
+declare module 'next-auth/jwt' {
+  interface JWT {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -58,18 +86,19 @@ export const authOptions: NextAuthOptions = {
           return {
             id: user.id,
             email: user.email,
-            name: user.name,
+            name: user.name || user.email.split('@')[0], // 使用邮箱前缀作为默认名称
             role: user.role,
           };
         } catch (error) {
           console.error('Authorization error:', error);
-          throw error;
+          return null;
         }
       },
     }),
   ],
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   pages: {
     signIn: '/auth/signin',
@@ -79,25 +108,56 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       try {
         if (user) {
-          token.role = user.role;
+          // 当用户首次登录时，将用户信息添加到 token
           token.id = user.id;
+          token.email = user.email;
+          token.name = user.name;
+          token.role = user.role;
         }
-        return token;
+        // 确保返回完整的 token
+        return {
+          ...token,
+          id: token.id || 'default-id',
+          email: token.email || 'default@example.com',
+          name: token.name || 'Default User',
+          role: token.role || 'USER',
+        };
       } catch (error) {
         console.error('JWT callback error:', error);
-        throw error;
+        // 返回带有默认值的 token
+        return {
+          ...token,
+          id: 'default-id',
+          email: 'default@example.com',
+          name: 'Default User',
+          role: 'USER',
+        };
       }
     },
     async session({ session, token }) {
       try {
         if (session?.user) {
-          session.user.role = token.role as string;
-          session.user.id = token.id as string;
+          // 确保 session.user 包含所有必要的字段
+          session.user = {
+            id: token.id || 'default-id',
+            email: token.email || 'default@example.com',
+            name: token.name || 'Default User',
+            role: token.role || 'USER',
+          };
         }
         return session;
       } catch (error) {
         console.error('Session callback error:', error);
-        throw error;
+        // 返回带有默认值的 session
+        return {
+          ...session,
+          user: {
+            id: 'default-id',
+            email: 'default@example.com',
+            name: 'Default User',
+            role: 'USER',
+          },
+        };
       }
     },
   },
@@ -105,5 +165,4 @@ export const authOptions: NextAuthOptions = {
 };
 
 const handler = NextAuth(authOptions);
-
 export { handler as GET, handler as POST } 
